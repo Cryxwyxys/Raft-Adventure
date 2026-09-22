@@ -113,12 +113,11 @@ raft = player()
 mouseX = 0
 speed = 10
 countdownS = 1000
-countdownR = 100
+countdownR = 0
 rocks = []
 
 while True:
 
-    z += speed
     countdownS -=1
     countdownR -=1
 
@@ -126,8 +125,9 @@ while True:
         speed += 1
         countdownS = 100
 
-    if countdownR == 0:
+    if countdownR <= 0:
         rocks.append(rock(river.size,smallRocks[randint(0,3)]))
+        countdownR = 100
 
     
 
