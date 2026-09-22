@@ -53,7 +53,7 @@ class road():
         return [self.leftcorner,self.rightcorner,self.orgin]
 
     def giveX(self, y):
-        temp = ((self.leftcorner+self.rightcorner)/2-400)/400 #offset dependent on y coordinate, middle of river divided by length
+        temp = ((self.leftcorner[0]+self.rightcorner[0])/2-400)/400 #offset dependent on y coordinate, middle of river divided by length
         return y * temp
 
 
@@ -68,7 +68,7 @@ class movingObject():
 
     def updatePos(self,river,speed): #top-middle
         self.zPos -= speed
-        self.yPos = 400-z*400/1000
+        self.yPos = 400-self.z*400/1000
         self.xPos = river.giveX(self.yPos)
     
 
@@ -77,7 +77,7 @@ class movingObject():
             return True
         return False
 
-class rock(movingObject):
+class Rock(movingObject):
 
     def __init__(self,riversize,img):
         self.width = 100
@@ -89,8 +89,8 @@ class rock(movingObject):
         self.hitbox.scale_by_ip(int(self.mod/self.width))
         super().__init__(riversize, self.width)
 
-    def updatePos(self,x):
-        super.updatePos(x)#topmiddle
+    def updatePos(self,river,speed):
+        super().updatePos(river,speed)#topmiddle
         self.yPos += self.height
 
 
@@ -126,7 +126,7 @@ while True:
         countdownS = 100
 
     if countdownR <= 0:
-        rocks.append(rock(river.size,smallRocks[randint(0,3)]))
+        rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
         countdownR = 100
 
     
@@ -145,9 +145,9 @@ while True:
     pygame.draw.polygon(screen,'BLUE',river.pos(x))
 
     for rock in rocks:
-        rock.updatePos(x)
+        rock.updatePos(river,speed)
         screen.blit(rock.img,rock.hitbox)
-    if rocks[0].zPos <= 0: rocks.pop[0]
+    if rocks[0].zPos <= 0: rocks.pop(0)
 
     screen.blit(raft.surface,(350,350))
     pygame.display.update()
