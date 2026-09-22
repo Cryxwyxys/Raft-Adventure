@@ -11,6 +11,14 @@ global sHeight
 sWidth = 1600
 sHeight = 800
 
+global rockWidth 
+global bigRockHeight 
+global smallRockHeight 
+
+rockWidth = 100
+bigRockHeight = 200
+smallRockHeight = 100
+
 pygame.init()
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
@@ -24,21 +32,21 @@ smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock0.png').conv
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock1.png').convert_alpha())
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock2.png').convert_alpha())
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock3.png').convert_alpha())
-for rock in smallRocks: rock = pygame.transform.scale(rock,(100,100))
+for rock in smallRocks: rock = pygame.transform.scale(rock, (rockWidth, smallRockHeight))
 
 bigRocks = []
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock0.png').convert_alpha())
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock1.png').convert_alpha())
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock2.png').convert_alpha())
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock3.png').convert_alpha())
-for rock in bigRocks: rock = pygame.transform.scale(rock,(100,200))
+for rock in bigRocks: rock = pygame.transform.scale(rock, (rockWidth, smallRockHeight))
 
 wall = []
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall0.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall1.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
-for rock in wall: rock = pygame.transform.scale(rock,(100,200))
+for rock in wall: rock = pygame.transform.scale(rock, (100, 200))
 
 
 
@@ -58,23 +66,24 @@ class Road():
         return [self.leftcorner,self.rightcorner,self.orgin]
 
     def giveX(self, y):
-        temp = ((self.leftcorner[0]+self.rightcorner[0]) / 2 - sWidth/2) / sHeight #offset dependent on y coordinate, middle of river divided by length
-        return y * temp
+        self.offsetFactor = ((self.leftcorner[0]+self.rightcorner[0]) / 2 - sWidth/2) / sHeight #offset dependent on y coordinate, middle of river divided by length
+        return y * self.offsetFactor
 
 
 class MovingObject():
 
-    def __init__(self,riverSize, sWidth):
-        self.zPos = 1000
-        self.width = sWidth
+    def __init__(self,riverSize, width):
+        self.zPos = 1500 #outside the window because of the screen needing time to boot
+        self.width = width
         self.riverSize = riverSize
-        self.xPos = randint(int(self.width/2), int(self.riverSize-(self.width/2)))
+        self.offset = randint(int(self.width/2), int(self.riverSize-(self.width/2)))
+        self.xPos = sWidth / 2
         self.yPos = 0
 
     def update(self,river,speed): #top-middle
         self.zPos -= speed
-        self.yPos = sHeight - self.z * sHeight/1000
-        self.xPos = river.giveX(self.yPos)
+        self.yPos = sHeight - self.zPos * sHeight / 1000
+        self.xPos = river.giveX(self.yPos) + self.offset * river.offsetFactor
     
 
     def detectCol(self,obj):
@@ -85,7 +94,7 @@ class MovingObject():
 class Rock(MovingObject):
 
     def __init__(self,riversize,img):
-        self.width = 100
+        self.width = rockWidth
         self.img = img
         self.z = 1000
         self.height = 100
@@ -95,8 +104,8 @@ class Rock(MovingObject):
         super().__init__(riversize, self.width)
 
     def update(self,river,speed):
-        super().update(river,speed)#topmiddle
-        self.yPos += self.height
+        super().update(river,speed) #topmiddle
+        self.yPos += self.height    #bottommiddle
         self.hitbox.bottom = self.yPos
 
 
@@ -111,8 +120,8 @@ class Player():
         self.surface = pygame.transform.scale(self.surface,(self.width, self.height))
 
     def update(self,x):
-        x-=sWidth/2
-        self.x += x/50
+        x -= sWidth / 2
+        self.x += x / 50
         return self.x
 
 
@@ -126,12 +135,12 @@ rocks = []
 
 while True:
 
-    countdownS -=1
-    countdownR -=speed
+    countdownS -= 1
+    countdownR -= speed
 
-    #if countdownS == 0:
-    #    speed += 1
-    #    countdownS = 100
+    if countdownS == 0:
+        speed += 1
+        countdownS = 100
 
     if countdownR <= 0:
         rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
@@ -152,11 +161,10 @@ while True:
 
     for rock in rocks:
         rock.update(river,speed)
+        print(rock.hitbox.bottom )
         screen.blit(rock.img, rock.hitbox)
-        print(rock.hitbox.bottom)
         
     if rocks[0].zPos <= 0: rocks.pop(0)
-
     screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
     pygame.display.update()
     clock.tick(60)
