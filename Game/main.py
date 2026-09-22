@@ -6,13 +6,18 @@ import os
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+global sWidth
+global sHeight
+sWidth = 1600
+sHeight = 800
+
 pygame.init()
-screen = pygame.display.set_mode((800,400))
+screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
 clock = pygame.time.Clock()
 
 sky_surface = pygame.image.load('Assets/graphics/Sky.png').convert()
-sky_surface = pygame.transform.scale(sky_surface,(800,400))
+sky_surface = pygame.transform.scale(sky_surface,(sWidth, sHeight))
 
 smallRocks = []
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock0.png').convert_alpha())
@@ -40,35 +45,35 @@ for rock in wall: rock = pygame.transform.scale(rock,(100,200))
 class Road():
 
     def __init__(self):
-        self.orgin = (400,0)
+        self.orgin = (sWidth/2, 0)
         self.size = 1000
         self.middle = self.size/2
-        self.leftcorner = (400-(self.size/2),400)
-        self.rightcorner = (400+(self.size/2),400)
+        self.leftcorner = (sWidth/2 - (self.size/2), sHeight)
+        self.rightcorner = (sWidth/2 + (self.size/2), sHeight)
 
     def pos(self,x):
         self.middle = self.size/2-x
-        self.leftcorner = (400-(self.size/2)-x,400)
-        self.rightcorner = (400+(self.size/2)-x,400)
+        self.leftcorner = (sWidth/2 - (self.size/2) - x, sHeight)
+        self.rightcorner = (sWidth/2 + (self.size/2) - x, sHeight)
         return [self.leftcorner,self.rightcorner,self.orgin]
 
     def giveX(self, y):
-        temp = ((self.leftcorner[0]+self.rightcorner[0])/2-400)/400 #offset dependent on y coordinate, middle of river divided by length
+        temp = ((self.leftcorner[0]+self.rightcorner[0]) / 2 - sWidth/2) / sHeight #offset dependent on y coordinate, middle of river divided by length
         return y * temp
 
 
 class MovingObject():
 
-    def __init__(self,riverSize, width):
+    def __init__(self,riverSize, sWidth):
         self.zPos = 1000
-        self.width = width
+        self.width = sWidth
         self.riverSize = riverSize
         self.xPos = randint(int(self.width/2), int(self.riverSize-(self.width/2)))
         self.yPos = 0
 
     def updatePos(self,river,speed): #top-middle
         self.zPos -= speed
-        self.yPos = 400-self.z*400/1000
+        self.yPos = sHeight - self.z * sHeight/1000
         self.xPos = river.giveX(self.yPos)
     
 
@@ -99,11 +104,13 @@ class Player():
     def __init__(self):
         self.x = 0
         self.health = 3
+        self.width = 100
+        self.height = 50
         self.surface = pygame.image.load('Assets/graphics/raft.png').convert_alpha()
-        self.surface = pygame.transform.scale(self.surface,(100,50))
+        self.surface = pygame.transform.scale(self.surface,(self.width, self.height))
 
     def update(self,x):
-        x-=400
+        x-=sWidth/2
         self.x += x/50
         return self.x
 
@@ -149,6 +156,6 @@ while True:
         screen.blit(rock.img,rock.hitbox)
     if rocks[0].zPos <= 0: rocks.pop(0)
 
-    screen.blit(raft.surface,(350,350))
+    screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
     pygame.display.update()
     clock.tick(60)
