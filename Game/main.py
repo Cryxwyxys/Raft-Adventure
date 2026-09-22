@@ -93,7 +93,6 @@ class Rock(movingObject):
         super().update(river,speed)#topmiddle
         self.yPos += self.height
         self.hitbox.bottom = self.yPos
-        print(self.zPos)
 
 
 class player():
@@ -109,7 +108,6 @@ class player():
         self.x += x/50
         return self.x
 
-
 river = road()
 raft = player()
 mouseX = 0
@@ -123,16 +121,13 @@ while True:
     countdownS -=1
     countdownR -=speed
 
-    
     if countdownS == 0:
         speed += 1
         countdownS = 100
 
     if countdownR <= 0:
         rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
-        countdownR = 100
-
-    
+        countdownR = 500
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -149,7 +144,9 @@ while True:
 
     for rock in rocks:
         rock.update(river,speed)
-        screen.blit(rock.img,rock.hitbox)
+        screen.blit(rock.img, rock.hitbox)
+        print(rock.hitbox.bottom)
+        
     if rocks[0].zPos <= 0: rocks.pop(0)
 
     screen.blit(raft.surface,(350,350))
