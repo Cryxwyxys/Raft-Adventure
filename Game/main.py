@@ -121,9 +121,9 @@ while True:
     countdownS -=1
     countdownR -=1
 
-    if countdownS == 0:
-        speed += 1
-        countdownS = 100
+    #if countdownS == 0:
+    #    speed += 1
+    #    countdownS = 100
 
     if countdownR <= 0:
         rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
