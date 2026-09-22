@@ -37,7 +37,7 @@ for rock in wall: rock = pygame.transform.scale(rock,(100,200))
 
 
 
-class road():
+class Road():
 
     def __init__(self):
         self.orgin = (400,0)
@@ -57,7 +57,7 @@ class road():
         return y * temp
 
 
-class movingObject():
+class MovingObject():
 
     def __init__(self,riverSize, width):
         self.zPos = 1000
@@ -77,7 +77,7 @@ class movingObject():
             return True
         return False
 
-class Rock(movingObject):
+class Rock(MovingObject):
 
     def __init__(self,riversize,img):
         self.width = 100
@@ -94,7 +94,7 @@ class Rock(movingObject):
         self.yPos += self.height
 
 
-class player():
+class Player():
 
     def __init__(self):
         self.x = 0
@@ -108,8 +108,8 @@ class player():
         return self.x
 
 
-river = road()
-raft = player()
+river = Road()
+raft = Player()
 mouseX = 0
 speed = 10
 countdownS = 1000
