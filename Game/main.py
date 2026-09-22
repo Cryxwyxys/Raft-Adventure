@@ -66,9 +66,9 @@ class movingObject():
         self.xPos = randint(int(self.width/2), int(self.riverSize-(self.width/2)))
         self.yPos = 0
 
-    def updatePos(self,river,speed): #top-middle
+    def update(self,river,speed): #top-middle
         self.zPos -= speed
-        self.yPos = 400-self.z*400/1000
+        self.yPos = 400-self.zPos*400/1000
         self.xPos = river.giveX(self.yPos)
     
 
@@ -89,9 +89,11 @@ class Rock(movingObject):
         self.hitbox.scale_by_ip(int(self.mod/self.width))
         super().__init__(riversize, self.width)
 
-    def updatePos(self,river,speed):
-        super().updatePos(river,speed)#topmiddle
+    def update(self,river,speed):
+        super().update(river,speed)#topmiddle
         self.yPos += self.height
+        self.hitbox.bottom = self.yPos
+        print(self.zPos)
 
 
 class player():
@@ -111,16 +113,17 @@ class player():
 river = road()
 raft = player()
 mouseX = 0
-speed = 10
-countdownS = 1000
+speed = 1
+countdownS = 100000
 countdownR = 0
 rocks = []
 
 while True:
 
     countdownS -=1
-    countdownR -=1
+    countdownR -=speed
 
+    
     if countdownS == 0:
         speed += 1
         countdownS = 100
@@ -145,7 +148,7 @@ while True:
     pygame.draw.polygon(screen,'BLUE',river.pos(x))
 
     for rock in rocks:
-        rock.updatePos(river,speed)
+        rock.update(river,speed)
         screen.blit(rock.img,rock.hitbox)
     if rocks[0].zPos <= 0: rocks.pop(0)
 
