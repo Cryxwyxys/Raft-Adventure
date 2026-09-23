@@ -1,5 +1,3 @@
-# Put game code here
-
 from random import randint
 import pygame
 import os
@@ -75,11 +73,12 @@ class MovingObject():
         self.xPos = sWidth / 2
         self.yPos = 0
 
-    def update(self,river,speed): #top-middle
+    def update(self, river, speed):
         self.zPos -= speed / self.zPos * 1000
         self.yPos = sHeight - self.zPos * sHeight / 1000
-        self.xPos = river.offsetFactor * self.yPos + sWidth / 2 
-    
+        deviation = self.offset - sWidth / 2          # seitlicher Versatz bei voller Flussbreite
+        scaled = deviation * (self.yPos / sHeight)     # schrumpft Richtung Horizont auf 0
+        self.xPos = river.offsetFactor * self.yPos + sWidth / 2 + scaled
 
     def detectCol(self,obj):
         if obj.xPos < self.xpos + self.width/2 and obj.xPos > self.xpos:
@@ -115,9 +114,9 @@ class Rock(MovingObject):
 class Wall(Rock):
 
     def __init__(self, riversize, img, b):
-        super().__init__(self, riversize, img)
+        super().__init__( riversize, img)
         self.height = 800
-        self.width = self.img.get.width 
+        self.width = self.img.get_width 
         if b : self.offset = sWidth/2 + riversize / 2
         else : 
             self.offset = sWidth/2 - riversize / 2
@@ -151,6 +150,7 @@ countdownS = 100000
 countdownR = 0
 countdownW = 0
 rocks = []
+walls = []
 
 while True:
 
@@ -167,8 +167,10 @@ while True:
         countdownR = 100
 
     if countdownW <= 0:
-        rocks.append(Rock(river.size,wall[randint(0,3)]))
-        countdownR = 10
+        walls.append(Wall(river.size,wall[randint(0,3)],0))
+        walls.append(Wall(river.size,wall[randint(0,3)],1))
+
+        countdownW = 10
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -183,10 +185,14 @@ while True:
     screen.blit(sky_surface, (0, 0)) 
     pygame.draw.polygon(screen,'BLUE',river.pos(x))
 
+    for cliff in walls:
+        cliff.update(river,speed)
+        screen.blit(cliff.img, cliff.hitbox)
+
     for rock in rocks:
         rock.update(river,speed)
         screen.blit(rock.img, rock.hitbox)
-        print(f"{rock.hitbox},{rock.img}")
+       
         
     if rocks[0].zPos <= 0: rocks.pop(0)
     screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
