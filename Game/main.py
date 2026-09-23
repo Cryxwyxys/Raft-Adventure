@@ -55,25 +55,20 @@ class Road():
     def __init__(self):
         self.orgin = (sWidth/2, 0)
         self.size = 1000
-        self.middle = self.size/2
         self.leftcorner = (sWidth/2 - (self.size/2), sHeight)
         self.rightcorner = (sWidth/2 + (self.size/2), sHeight)
 
     def pos(self,x):
-        self.middle = self.size/2-x
         self.leftcorner = (sWidth/2 - (self.size/2) - x, sHeight)
         self.rightcorner = (sWidth/2 + (self.size/2) - x, sHeight)
+        self.offsetFactor = (self.leftcorner[0]+self.rightcorner[0] - sWidth) / 2  / sHeight
         return [self.leftcorner,self.rightcorner,self.orgin]
-
-    def giveX(self, y):
-        self.offsetFactor = ((self.leftcorner[0]+self.rightcorner[0]) / 2 - sWidth/2) / sHeight #offset dependent on y coordinate, middle of river divided by length
-        return y * self.offsetFactor
 
 
 class MovingObject():
 
     def __init__(self,riverSize, width):
-        self.zPos = 1500 #outside the window because of the screen needing time to boot
+        self.zPos = 1500 #outside the window because of the screen needing time to boot I think
         self.width = width
         self.riverSize = riverSize
         self.offset = randint(int(self.width/2), int(self.riverSize-(self.width/2)))
@@ -83,7 +78,7 @@ class MovingObject():
     def update(self,river,speed): #top-middle
         self.zPos -= speed
         self.yPos = sHeight - self.zPos * sHeight / 1000
-        self.xPos = river.giveX(self.yPos) + self.offset * river.offsetFactor
+        self.xPos = river.offsetFactor * self.yPos + sWidth / 2#+ self.offset * river.offsetFactor 
     
 
     def detectCol(self,obj):
@@ -93,20 +88,31 @@ class MovingObject():
 
 class Rock(MovingObject):
 
-    def __init__(self,riversize,img):
+    def __init__(self, riversize, img):
         self.width = rockWidth
+        self.orig_img = img  # keep the original, unscaled image around
         self.img = img
         self.z = 1000
         self.height = 100
-        self.mod = self.width/self.z
+        self.mod = (1000 - self.z) / 1000
         self.hitbox = self.img.get_rect()
-        self.hitbox.scale_by_ip(int(self.mod/self.width))
+        self.hitbox.scale_by_ip(int(self.mod * self.width))
         super().__init__(riversize, self.width)
 
-    def update(self,river,speed):
-        super().update(river,speed) #topmiddle
-        self.yPos += self.height    #bottommiddle
-        self.hitbox.bottom = self.yPos
+    def update(self, river, speed):
+        super().update(river, speed)  # topmiddle
+        self.mod = (1000 - self.zPos) / 1000
+        if self.mod < 0:
+            self.mod = 0
+        self.width = max(1, int(self.mod * rockWidth))
+        self.height = max(1, int(self.mod * smallRockHeight))
+        self.img = pygame.transform.scale(self.orig_img, (self.width, self.height))  # always scale from the original
+        self.yPos += self.height / 2  # middle
+        self.hitbox = self.img.get_rect(center=(self.xPos, self.yPos))
+
+    def scale(self, z):
+        pass
+
 
 
 class Player():
@@ -161,8 +167,8 @@ while True:
 
     for rock in rocks:
         rock.update(river,speed)
-        print(rock.hitbox.bottom )
         screen.blit(rock.img, rock.hitbox)
+        print(f"{rock.hitbox},{rock.img}")
         
     if rocks[0].zPos <= 0: rocks.pop(0)
     screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
