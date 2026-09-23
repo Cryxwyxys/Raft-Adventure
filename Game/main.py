@@ -71,7 +71,7 @@ class MovingObject():
         self.zPos = 1500 #outside the window because of the screen needing time to boot I think
         self.width = width
         self.riverSize = riverSize
-        self.offset = randint(int(self.width/2), int(self.riverSize-(self.width/2)))
+        self.offset = randint(int(sWidth/2-riverSize/2 + width/2), int(sWidth/2 + riverSize/2 - width/2))
         self.xPos = sWidth / 2
         self.yPos = 0
 
@@ -85,6 +85,7 @@ class MovingObject():
         if obj.xPos < self.xpos + self.width/2 and obj.xPos > self.xpos:
             return True
         return False
+
 
 class Rock(MovingObject):
 
@@ -110,9 +111,20 @@ class Rock(MovingObject):
         self.yPos += self.height / 2  # middle
         self.hitbox = self.img.get_rect(center=(self.xPos, self.yPos))
 
-    def scale(self, z):
-        pass
 
+class Wall(Rock):
+
+    def __init__(self, riversize, img, b):
+        super().__init__(self, riversize, img)
+        self.height = 800
+        self.width = self.img.get.width 
+        if b : self.offset = sWidth/2 + riversize / 2
+        else : 
+            self.offset = sWidth/2 - riversize / 2
+            self.img = pygame.transform.flip(self.img,0,1)
+
+    def update(self, river , speed):
+        super().update(river, speed)
 
 
 class Player():
@@ -137,12 +149,14 @@ mouseX = 0
 speed = 1
 countdownS = 100000
 countdownR = 0
+countdownW = 0
 rocks = []
 
 while True:
 
     countdownS -= 1
     countdownR -= speed
+    countdownW -= speed
 
     if countdownS == 0:
         speed += 1
@@ -150,7 +164,11 @@ while True:
 
     if countdownR <= 0:
         rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
-        countdownR = 500
+        countdownR = 100
+
+    if countdownW <= 0:
+        rocks.append(Rock(river.size,wall[randint(0,3)]))
+        countdownR = 10
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
