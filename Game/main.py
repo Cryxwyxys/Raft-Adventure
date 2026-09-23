@@ -44,9 +44,7 @@ wall.append(pygame.image.load('Assets/graphics/Rocks/wall0.png').convert_alpha()
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall1.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
-for rock in wall: rock = pygame.transform.scale(rock, (100, 200))
-
-
+for rock in wall: rock = pygame.transform.scale(rock, (200, 800))
 
 class Road():
 
@@ -67,7 +65,7 @@ class MovingObject():
 
     def __init__(self,riverSize, width):
         self.zPos = 1500 #outside the window because of the screen needing time to boot I think
-        self.width = width
+        #self.width = width  #maybe unnecessary
         self.riverSize = riverSize
         self.offset = randint(int(sWidth/2-riverSize/2 + width/2), int(sWidth/2 + riverSize/2 - width/2))
         self.xPos = sWidth / 2
@@ -89,14 +87,13 @@ class MovingObject():
 class Rock(MovingObject):
 
     def __init__(self, riversize, img):
-        self.width = rockWidth
-        self.orig_img = img  # keep the original, unscaled image around
+        self.width = img.get_width()
+        self.orig_img = img  # keep the original, unscaled image around to prevent quality loss (im a retard)
         self.img = img
-        self.z = 1000
-        self.height = 100
-        self.mod = (1000 - self.z) / 1000
+        self.zPos = 1000
+        self.height = img.get_height()
+        self.mod = (1000 - self.zPos) / 1000
         self.hitbox = self.img.get_rect()
-        self.hitbox.scale_by_ip(int(self.mod * self.width))
         super().__init__(riversize, self.width)
 
     def update(self, river, speed):
@@ -104,8 +101,8 @@ class Rock(MovingObject):
         self.mod = (1000 - self.zPos) / 1000
         if self.mod < 0:
             self.mod = 0
-        self.width = max(1, int(self.mod * rockWidth))
-        self.height = max(1, int(self.mod * smallRockHeight))
+        self.width = max(1, int(self.mod * self.orig_img.get_width()))
+        self.height = max(1, int(self.mod * self.orig_img.get_height()))
         self.img = pygame.transform.scale(self.orig_img, (self.width, self.height))  # always scale from the original
         self.yPos += self.height / 2  # middle
         self.hitbox = self.img.get_rect(center=(self.xPos, self.yPos))
@@ -115,12 +112,11 @@ class Wall(Rock):
 
     def __init__(self, riversize, img, b):
         super().__init__( riversize, img)
-        self.height = 800
-        self.width = self.img.get_width 
         if b : self.offset = sWidth/2 + riversize / 2
         else : 
             self.offset = sWidth/2 - riversize / 2
-            self.img = pygame.transform.flip(self.img,0,1)
+            self.img = pygame.transform.flip(self.img,0,True)
+        print(self.width)
 
     def update(self, river , speed):
         super().update(river, speed)
@@ -186,11 +182,11 @@ while True:
     pygame.draw.polygon(screen,'BLUE',river.pos(x))
 
     for cliff in walls:
-        cliff.update(river,speed)
+        cliff.update(river, speed)
         screen.blit(cliff.img, cliff.hitbox)
 
     for rock in rocks:
-        rock.update(river,speed)
+        rock.update(river, speed)
         screen.blit(rock.img, rock.hitbox)
        
         
