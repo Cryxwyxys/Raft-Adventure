@@ -30,21 +30,23 @@ smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock0.png').conv
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock1.png').convert_alpha())
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock2.png').convert_alpha())
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock3.png').convert_alpha())
-for rock in smallRocks: rock = pygame.transform.scale(rock, (rockWidth, smallRockHeight))
+for i in range(len(smallRocks)): smallRocks[i] = pygame.transform.scale(smallRocks[i], (rockWidth, smallRockHeight))
 
 bigRocks = []
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock0.png').convert_alpha())
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock1.png').convert_alpha())
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock2.png').convert_alpha())
 bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock3.png').convert_alpha())
-for rock in bigRocks: rock = pygame.transform.scale(rock, (rockWidth, smallRockHeight))
+for i in range(len(bigRocks)): bigRocks[i] = pygame.transform.scale(bigRocks[i], (rockWidth, bigRockHeight))
 
 wall = []
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall0.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall1.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
-for rock in wall: rock = pygame.transform.scale(rock, (200, 800))
+for i in range(len(wall)): wall[i] = pygame.transform.scale(wall[i], (1000, 4000))
+ 
+
 
 class Road():
 
@@ -64,7 +66,7 @@ class Road():
 class MovingObject():
 
     def __init__(self,riverSize, width):
-        self.zPos = 1500 #outside the window because of the screen needing time to boot I think
+        self.zPos = 1000 #outside the window because of the screen needing time to boot I think
         #self.width = width  #maybe unnecessary
         self.riverSize = riverSize
         self.offset = randint(int(sWidth/2-riverSize/2 + width/2), int(sWidth/2 + riverSize/2 - width/2))
@@ -79,7 +81,7 @@ class MovingObject():
         self.xPos = river.offsetFactor * self.yPos + sWidth / 2 + scaled
 
     def detectCol(self,obj):
-        if obj.xPos < self.xpos + self.width/2 and obj.xPos > self.xpos:
+        if obj.xPos < self.xPos + self.width/2 and obj.xPos > self.xPos:
             return True
         return False
 
@@ -107,16 +109,18 @@ class Rock(MovingObject):
         self.yPos += self.height / 2  # middle
         self.hitbox = self.img.get_rect(center=(self.xPos, self.yPos))
 
+        def __del__(self):
+            print(f"i was deleted at {self.yPos}")
+
 
 class Wall(Rock):
 
     def __init__(self, riversize, img, b):
         super().__init__( riversize, img)
-        if b : self.offset = sWidth/2 + riversize / 2
+        if b : self.offset = sWidth/2 + riversize / 2 + self.width / 2
         else : 
-            self.offset = sWidth/2 - riversize / 2
-            self.img = pygame.transform.flip(self.img,0,True)
-        print(self.width)
+            self.offset = sWidth/2 - riversize / 2 - self.width / 2
+            self.orig_img = pygame.transform.flip(self.img,1,0)
 
     def update(self, river , speed):
         super().update(river, speed)
@@ -125,7 +129,7 @@ class Wall(Rock):
 class Player():
 
     def __init__(self):
-        self.x = 0
+        self.xPos = 0
         self.health = 3
         self.width = 100
         self.height = 50
@@ -134,8 +138,11 @@ class Player():
 
     def update(self,x):
         x -= sWidth / 2
-        self.x += x / 50
-        return self.x
+        self.xPos += x / 50
+        return self.xPos
+
+    def damage(self, x):
+        pass
 
 
 river = Road()
@@ -160,13 +167,13 @@ while True:
 
     if countdownR <= 0:
         rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
-        countdownR = 100
+        countdownR = 90
 
     if countdownW <= 0:
         walls.append(Wall(river.size,wall[randint(0,3)],0))
         walls.append(Wall(river.size,wall[randint(0,3)],1))
 
-        countdownW = 10
+        countdownW = 200
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -177,7 +184,6 @@ while True:
 
     x = raft.update(mouseX)
 
-    
     screen.blit(sky_surface, (0, 0)) 
     pygame.draw.polygon(screen,'BLUE',river.pos(x))
 
@@ -185,12 +191,20 @@ while True:
         cliff.update(river, speed)
         screen.blit(cliff.img, cliff.hitbox)
 
-    for rock in rocks:
-        rock.update(river, speed)
-        screen.blit(rock.img, rock.hitbox)
+    for i in range(len(rocks)):
+        rocks[i].update(river, speed)
+        screen.blit(rocks[i].img, rocks[i].hitbox)
        
-        
-    if rocks[0].zPos <= 0: rocks.pop(0)
+    if rocks[0].yPos + rocks[0].height/2 >= sHeight: 
+        if rocks[0].detectCol(raft):
+            raft.damage(rocks[0].xPos)
+        rocks.pop(0)
+
+    if walls[0].yPos >= sHeight: 
+        if walls[0].detectCol(raft) :
+            raft.damage(walls[0].xPos)
+        walls.pop(0)
+
     screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
     pygame.display.update()
     clock.tick(60)
