@@ -76,9 +76,9 @@ class MovingObject():
         self.yPos = 0
 
     def update(self,river,speed): #top-middle
-        self.zPos -= speed
+        self.zPos -= speed / self.zPos * 1000
         self.yPos = sHeight - self.zPos * sHeight / 1000
-        self.xPos = river.offsetFactor * self.yPos + sWidth / 2#+ self.offset * river.offsetFactor 
+        self.xPos = river.offsetFactor * self.yPos + sWidth / 2 
     
 
     def detectCol(self,obj):
