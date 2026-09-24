@@ -1,13 +1,14 @@
 from random import randint
 import pygame
 import os
+import time
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 global sWidth
 global sHeight
-sWidth = 1920
-sHeight = 1080
+sWidth = 800
+sHeight = 900
 
 global rockWidth 
 global bigRockHeight 
@@ -82,10 +83,10 @@ class MovingObject():
         self.river = river
         self.zPos -= speed / self.zPos * 1000
         self.yPos = sHeight - self.zPos * sHeight / 1000
-        self.xPos = self.xAt(self.yPos)
+        self.xPos = self.xAt(self.yPos) 
 
     def detectCol(self, obj):
-        if obj.xPos < self.xPos + self.width/2 and obj.xPos > self.xPos:
+        if self.hitbox.colliderect(obj.hitbox):
             return True
         return False
 
@@ -117,7 +118,7 @@ class Rock(MovingObject):
         self.hitbox = self.img.get_rect(center=(self.xPos, self.yPos))
 
         def __del__(self):
-            print(f"i was deleted at {self.yPos}")
+            pass
 
 
 class Wall(Rock):
@@ -139,21 +140,50 @@ class Wall(Rock):
 class Player():
 
     def __init__(self):
-        self.xPos = 0
+        self.lives = 3
+        self.xPos = sWidth / 2
         self.health = 3
-        self.width = 100
-        self.height = 50
+        self.width = 150
+        self.height = 100
         self.surface = pygame.image.load('Assets/graphics/raft.png').convert_alpha()
         self.surface = pygame.transform.scale(self.surface,(self.width, self.height))
         self.hitbox = self.surface.get_rect()
+        self.hitbox.center = (sWidth/2, sHeight - self.height/2)
+        self.img = self.surface
+
+        self.invisFrames = 5
+        self.lasthit = time.time()
 
     def update(self,x):
-        x -= sWidth / 2
-        self.xPos += x / 50
+
+        self.updateVis()
+        self.updatePos(x)
+
         return self.xPos
 
+    def updatePos(self,x):
+
+        x -= sWidth / 2
+        self.xPos += x / 50
+
+    def updateVis(self):
+        if time.time() - self.lasthit > 1:
+            print("i")
+            self.surface = self.img
+
     def damage(self, x):
-        print("col")
+        if time.time() - self.lasthit > self.invisFrames:
+            self.lives -= 1
+        if self.xPos > x:
+            self.xPos += 100
+            self.surface = pygame.transform.rotate(self.surface, 15)
+        else: 
+            self.xPos -= 100
+            self.surface = pygame.transform.rotate(self.surface, -15)
+
+        self.lasthit = time.time()
+        print(time.time()-self.lasthit)
+
         pass
 
 
@@ -212,11 +242,14 @@ while True:
             raft.damage(rocks[0].xPos)
         rocks.pop(0)
 
-    if walls[0].yPos >= sHeight: 
+    if walls[0].yPos + walls[0].height/2 >= sHeight: 
+        
+
         if walls[0].detectCol(raft) :
-            raft.damage(walls[0].xPos)
+            raft.damage(walls[0].hitbox.centerx)
         walls.pop(0)
 
     screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
+
     pygame.display.update()
     clock.tick(60)
