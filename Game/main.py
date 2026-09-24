@@ -170,6 +170,10 @@ class Player():
 
         x *= sWidth / 2
         self.xPos += x / 50
+        if abs(self.xPos) > 500: 
+            if x > 0 : self.xPos = 400
+            else: self.xPos = -400
+
 
     def updateVis(self):
         if time.time() - self.lasthit > 1:
@@ -178,12 +182,13 @@ class Player():
     def damage(self, x):
         if time.time() - self.lasthit > self.invisFrames:
             self.lives -= 1
+
         if self.xPos > x:
             self.xPos += 100
-            self.surface = pygame.transform.rotate(self.surface, 15)
+            self.surface = pygame.transform.rotate(self.img, 15)
         else: 
             self.xPos -= 100
-            self.surface = pygame.transform.rotate(self.surface, -15)
+            self.surface = pygame.transform.rotate(self.img, -15)
 
         self.lasthit = time.time()
         print(time.time()-self.lasthit)
