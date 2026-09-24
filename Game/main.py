@@ -6,8 +6,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 global sWidth
 global sHeight
-sWidth = 1600
-sHeight = 800
+sWidth = 1920
+sHeight = 1080
 
 global rockWidth 
 global bigRockHeight 
@@ -40,11 +40,11 @@ bigRocks.append(pygame.image.load('Assets/graphics/Rocks/bigRock3.png').convert_
 for i in range(len(bigRocks)): bigRocks[i] = pygame.transform.scale(bigRocks[i], (rockWidth, bigRockHeight))
 
 wall = []
-wall.append(pygame.image.load('Assets/graphics/Rocks/wall0.png').convert_alpha())
-wall.append(pygame.image.load('Assets/graphics/Rocks/wall1.png').convert_alpha())
+wall.append(pygame.image.load('Assets/graphics/Rocks/wall8.png').convert_alpha())
+wall.append(pygame.image.load('Assets/graphics/Rocks/wall5.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha())
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
-for i in range(len(wall)): wall[i] = pygame.transform.scale(wall[i], (1000, 4000))
+for i in range(len(wall)): wall[i] = pygame.transform.scale(wall[i], (200, 400))
  
 
 
@@ -65,25 +65,32 @@ class Road():
 
 class MovingObject():
 
-    def __init__(self,riverSize, width):
-        self.zPos = 1000 #outside the window because of the screen needing time to boot I think
-        #self.width = width  #maybe unnecessary
+    def __init__(self, riverSize, width):
+        self.zPos = 1000
         self.riverSize = riverSize
         self.offset = randint(int(sWidth/2-riverSize/2 + width/2), int(sWidth/2 + riverSize/2 - width/2))
         self.xPos = sWidth / 2
         self.yPos = 0
 
+    def xAt(self, y):
+        # x-Position der Fluss-Kante (inkl. Lenkung und seitlichem offset) bei Tiefe y
+        deviation = self.offset - sWidth / 2
+        scaled = deviation * (y / sHeight)
+        return self.river.offsetFactor * y + sWidth / 2 + scaled
+
     def update(self, river, speed):
+        self.river = river
         self.zPos -= speed / self.zPos * 1000
         self.yPos = sHeight - self.zPos * sHeight / 1000
-        deviation = self.offset - sWidth / 2          # seitlicher Versatz bei voller Flussbreite
-        scaled = deviation * (self.yPos / sHeight)     # schrumpft Richtung Horizont auf 0
-        self.xPos = river.offsetFactor * self.yPos + sWidth / 2 + scaled
+        self.xPos = self.xAt(self.yPos)
 
-    def detectCol(self,obj):
+    def detectCol(self, obj):
         if obj.xPos < self.xPos + self.width/2 and obj.xPos > self.xPos:
             return True
         return False
+
+
+
 
 
 class Rock(MovingObject):
@@ -116,14 +123,17 @@ class Rock(MovingObject):
 class Wall(Rock):
 
     def __init__(self, riversize, img, b):
-        super().__init__( riversize, img)
-        if b : self.offset = sWidth/2 + riversize / 2 + self.width / 2
-        else : 
+        super().__init__(riversize, img)
+        if b: self.offset = sWidth/2 + riversize / 2 + self.width / 2
+        else:
             self.offset = sWidth/2 - riversize / 2 - self.width / 2
-            self.orig_img = pygame.transform.flip(self.img,1,0)
+            self.img = pygame.transform.flip(self.img, 1, 0)
 
-    def update(self, river , speed):
-        super().update(river, speed)
+    def update(self, river, speed):
+        super().update(river, speed)            # Rock.update: setzt Größe + self.yPos aufs Zentrum
+        bottom_y = self.yPos + self.height / 2   # unteres, spielernahes Ende statt oberer Sprite-Kante
+        self.xPos = self.xAt(bottom_y)
+        self.hitbox.centerx = self.xPos
 
 
 class Player():
@@ -135,6 +145,7 @@ class Player():
         self.height = 50
         self.surface = pygame.image.load('Assets/graphics/raft.png').convert_alpha()
         self.surface = pygame.transform.scale(self.surface,(self.width, self.height))
+        self.hitbox = self.surface.get_rect()
 
     def update(self,x):
         x -= sWidth / 2
@@ -142,6 +153,7 @@ class Player():
         return self.xPos
 
     def damage(self, x):
+        print("col")
         pass
 
 
@@ -173,7 +185,7 @@ while True:
         walls.append(Wall(river.size,wall[randint(0,3)],0))
         walls.append(Wall(river.size,wall[randint(0,3)],1))
 
-        countdownW = 200
+        countdownW = 20
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
