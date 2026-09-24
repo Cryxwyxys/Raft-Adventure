@@ -4,10 +4,12 @@ import os
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+global joystick
+
 global sWidth
 global sHeight
-sWidth = 1920
-sHeight = 1080
+sWidth = 800
+sHeight = 600
 
 global rockWidth 
 global bigRockHeight 
@@ -18,6 +20,9 @@ bigRockHeight = 200
 smallRockHeight = 100
 
 pygame.init()
+pygame.joystick.init()
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
 clock = pygame.time.Clock()
@@ -148,18 +153,17 @@ class Player():
         self.hitbox = self.surface.get_rect()
 
     def update(self,x):
-        x -= sWidth / 2
+        x *= sWidth / 2
         self.xPos += x / 50
         return self.xPos
 
     def damage(self, x):
-        print("col")
         pass
 
 
 river = Road()
 raft = Player()
-mouseX = 0
+joystickX = 0
 speed = 1
 countdownS = 100000
 countdownR = 0
@@ -187,14 +191,15 @@ while True:
 
         countdownW = 20
 
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if event.type == pygame.MOUSEMOTION:
-            mouseX = event.pos[0]
+   
+    joystickX = round(joystick.get_axis(0),2) #defining which axis to monitor
 
-    x = raft.update(mouseX)
+    x = raft.update(joystickX)
 
     screen.blit(sky_surface, (0, 0)) 
     pygame.draw.polygon(screen,'BLUE',river.pos(x))
