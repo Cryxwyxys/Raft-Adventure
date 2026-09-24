@@ -173,7 +173,6 @@ class Player():
 
     def updateVis(self):
         if time.time() - self.lasthit > 1:
-            print("i")
             self.surface = self.img
 
     def damage(self, x):
