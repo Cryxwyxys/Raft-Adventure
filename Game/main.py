@@ -72,6 +72,7 @@ class Road():
         self.size = riversize
         self.leftcorner = (sWidth/2 - (self.size/2), sHeight)
         self.rightcorner = (sWidth/2 + (self.size/2), sHeight)
+        self.offsetFactor = (self.leftcorner[0]+self.rightcorner[0] - sWidth) / 2  / sHeight
 
     def pos(self,x):
         self.leftcorner = (sWidth/2 - (self.size/2) - x, sHeight)
@@ -84,8 +85,8 @@ class MovingObject():
 
     def __init__(self, width):
         self.zPos = 1000
-        self.riverSize = riverSize
-        self.offset = randint(int(sWidth/2-riverSize/2 + width/2), int(sWidth/2 + riverSize/2 - width/2))
+        self.riverSize = riversize
+        self.offset = randint(int(sWidth/2-riversize/2 + width/2), int(sWidth/2 + riversize/2 - width/2))
         self.xPos = sWidth / 2
         self.yPos = 0
 
@@ -96,6 +97,7 @@ class MovingObject():
         return self.river.offsetFactor * y + sWidth / 2 + scaled
 
     def update(self, river, speed):
+        self.river = river
         self.zPos -= speed / self.zPos * 1000
         self.yPos = sHeight - self.zPos * sHeight / 1000
         self.xPos = self.xAt(self.yPos) 
@@ -118,8 +120,8 @@ class Rock(MovingObject):
         self.hitbox = self.img.get_rect()
         super().__init__( self.width)
 
-    def update(self, speed):
-        super().update( speed)  # topmiddle
+    def update(self, river, speed):
+        super().update( river, speed)  # topmiddle
         self.mod = (1000 - self.zPos) / 1000
         if self.mod < 0:
             self.mod = 0
@@ -144,8 +146,8 @@ class Wall(Rock):
             self.img = pygame.transform.flip(img, True, False)
             self.orig_img = self.img
 
-    def update(self, speed):
-        super().update(speed)            # Rock.update: setzt Größe + self.yPos aufs Zentrum
+    def update(self, river, speed):
+        super().update(river, speed)            # Rock.update: setzt Größe + self.yPos aufs Zentrum
         bottom_y = self.yPos + self.height / 2   # unteres, spielernahes Ende statt oberer Sprite-Kante
         self.xPos = self.xAt(bottom_y)
         self.hitbox.centerx = self.xPos
@@ -155,7 +157,7 @@ class Player():
 
     def __init__(self):
         self.lives = 3
-        self.xPos = sWidth / 2
+        self.xPos = 0
         self.health = 3
         self.width = 150
         self.height = 100
@@ -165,7 +167,7 @@ class Player():
         self.hitbox.center = (sWidth/2, sHeight - self.height/2)
         self.img = self.surface
 
-        self.invisFrames = 5
+        self.invisFrames = 3
         self.lasthit = time.time()
 
     def update(self,x):
@@ -176,9 +178,8 @@ class Player():
 
         return self.xPos
 
-    def updatePos(self,x):
-
-        self.xPos += x / 50
+    def updatePos(self, x):
+        self.xPos += (int(x) / 50)
 
         if abs(self.xPos) > riversize / 2: 
             if x > 0 : self.xPos = riversize / 2
@@ -190,17 +191,18 @@ class Player():
             self.surface = self.img
 
     def damage(self, x):
+
         if time.time() - self.lasthit > self.invisFrames:
             self.lives -= 1
 
-        if self.xPos > x:
-            self.xPos += 100
-            self.surface = pygame.transform.rotate(self.img, 15)
-        else: 
-            self.xPos -= 100
-            self.surface = pygame.transform.rotate(self.img, -15)
+            if self.xPos > x:
+                self.xPos += 100
+                self.surface = pygame.transform.rotate(self.img, 15)
+            else: 
+                self.xPos -= 100
+                self.surface = pygame.transform.rotate(self.img, -15)
 
-        self.lasthit = time.time()
+            self.lasthit = time.time()
 
 
 class RunningGame():
@@ -223,7 +225,7 @@ class RunningGame():
                 pygame.quit()
                 exit()
    
-        self.inputX = self.getInput(usesJoystick)
+        self.getInput(usesJoystick)
         self.countdownS -= 1
         self.countdownR -= self.speed
         self.countdownW -= self.speed
@@ -237,7 +239,9 @@ class RunningGame():
             self.inputX = self.joystickX * sWidth / 2
 
         else:
-            self.inputX = pygame.mouse.get_pos()[0] - sWidth / 2
+            temp =  pygame.mouse.get_pos()
+            self.inputX = temp[0] - sWidth / 2
+            
 
     def spawnRocks(self):
         if self.countdownS == 0:
@@ -256,27 +260,35 @@ class RunningGame():
 
     def update(self):
 
-            for i in range(len(rocks)):
-                rocks[i].update(self.speed)
-
+            for i in range(len(self.rocks)):
+                self.rocks[i].update(self.river, self.speed)
             self.raft.update(self.inputX)
+
+            temp = len(self.rocks)
+            for i in range(temp):
+                if self.rocks[i].yPos - self.rocks[i].height / 2 > sHeight:
+                    self.rocks.pop(i)
+                    i -= 1
+                    temp -= 1
+                else: break
 
     def doCol(self):
 
-        for i in range(len(self.rocks), 0 , -1):
-            if self.rocks[0].yPos + self.rocks[0].height/2 >= sHeight: 
-                if self.rocks[0].detectCol(raft):
-                    self.raft.damage(rocks[0].xPos)
+        for i in range(len(self.rocks)):
+            if self.rocks[i].yPos + self.rocks[i].height/2 >= sHeight: 
+                if self.rocks[i].detectCol(self.raft):
+                    self.raft.damage(self.rocks[i].xPos)
+            else: break
 
     def render(self):
 
         screen.blit(sky_surface, (0, 0)) 
-        pygame.draw.polygon(screen,'BLUE',river.pos(raft.xPos))
+        pygame.draw.polygon(screen,'BLUE',self.river.pos(self.raft.xPos))
 
         for rock in self.rocks:
-            screen.blit(rocks[i].img, rocks[i].hitbox)
+            screen.blit(rock.img, rock.hitbox)
 
-        screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
+        screen.blit(self.raft.surface,((sWidth-self.raft.width)/2,sHeight-self.raft.height))
 
         pygame.display.update()
 
@@ -298,6 +310,6 @@ class RunningGame():
 
 
 
-if  __name__ == "main":
-    p = Game()
+if  __name__ == "__main__":
+    p = RunningGame()
     p.run()
