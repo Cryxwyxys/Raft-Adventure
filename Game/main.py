@@ -21,9 +21,7 @@ bigRockHeight = 200
 smallRockHeight = 100
 
 pygame.init()
-pygame.joystick.init()
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
+
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
 clock = pygame.time.Clock()
@@ -52,6 +50,28 @@ wall.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha()
 wall.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
 for i in range(len(wall)): wall[i] = pygame.transform.scale(wall[i], (200, 400))
  
+
+
+
+if(pygame.joystick.get_count()):
+    pygame.joystick.init()
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+    usesJoystick = True   
+else:
+    usesJoystick = False
+
+
+def getInput(usesJoystick):
+
+    if(usesJoystick):
+        joystickX = round(joystick.get_axis(0),2) 
+        inpuX = joystickX * sWidth / 2
+
+    else:
+        inputX = pygame.mouse.get_pos()[0] - sWidth / 2
+
+    return inputX
 
 
 class Road():
@@ -94,9 +114,6 @@ class MovingObject():
         if self.hitbox.colliderect(obj.hitbox):
             return True
         return False
-
-
-
 
 
 class Rock(MovingObject):
@@ -168,8 +185,8 @@ class Player():
 
     def updatePos(self,x):
 
-        x *= sWidth / 2
         self.xPos += x / 50
+
         if abs(self.xPos) > 500: 
             if x > 0 : self.xPos = 400
             else: self.xPos = -400
@@ -232,12 +249,11 @@ while True:
             pygame.quit()
             exit()
    
-    joystickX = round(joystick.get_axis(0),2) #defining which axis to monitor
-    
-    x = raft.update(joystickX)
+    inputX = getInput(usesJoystick)
+    raft.updatePos(inputX)
 
     screen.blit(sky_surface, (0, 0)) 
-    pygame.draw.polygon(screen,'BLUE',river.pos(x))
+    pygame.draw.polygon(screen,'BLUE',river.pos(raft.xPos))
 
     for cliff in walls:
         cliff.update(river, speed)
