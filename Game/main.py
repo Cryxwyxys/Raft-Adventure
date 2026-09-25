@@ -5,7 +5,9 @@ import time
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-global joystick
+global riversize
+
+riversize = 1000
 
 global sWidth
 global sHeight
@@ -66,7 +68,7 @@ def getInput(usesJoystick):
 
     if(usesJoystick):
         joystickX = round(joystick.get_axis(0),2) 
-        inpuX = joystickX * sWidth / 2
+        inputX = joystickX * sWidth / 2
 
     else:
         inputX = pygame.mouse.get_pos()[0] - sWidth / 2
@@ -78,7 +80,7 @@ class Road():
 
     def __init__(self):
         self.orgin = (sWidth/2, 0)
-        self.size = 1000
+        self.size = riversize
         self.leftcorner = (sWidth/2 - (self.size/2), sHeight)
         self.rightcorner = (sWidth/2 + (self.size/2), sHeight)
 
@@ -118,7 +120,7 @@ class MovingObject():
 
 class Rock(MovingObject):
 
-    def __init__(self, riversize, img):
+    def __init__(self, img):
         self.width = img.get_width()
         self.orig_img = img  # keep the original, unscaled image around to prevent quality loss (im a retard)
         self.img = img
@@ -145,12 +147,16 @@ class Rock(MovingObject):
 
 class Wall(Rock):
 
-    def __init__(self, riversize, img, b):
-        super().__init__(riversize, img)
-        if b: self.offset = sWidth/2 + riversize / 2 + self.width / 2
+    def __init__(self, riversize, img, right):
+        super().__init__( img)
+        if right: 
+            self.offset = sWidth/2 + riversize / 2 + self.width / 2
+            print("kms")
         else:
             self.offset = sWidth/2 - riversize / 2 - self.width / 2
-            self.img = pygame.transform.flip(self.img, 1, 0)
+            self.img = pygame.transform.flip(img, True, False)
+            self.orig_img = self.img
+            print("hä")
 
     def update(self, river, speed):
         super().update(river, speed)            # Rock.update: setzt Größe + self.yPos aufs Zentrum
@@ -178,8 +184,9 @@ class Player():
 
     def update(self,x):
 
+        if(time.time()-self.lasthit > 2):
+            self.updatePos(x)
         self.updateVis()
-        self.updatePos(x)
 
         return self.xPos
 
@@ -187,9 +194,9 @@ class Player():
 
         self.xPos += x / 50
 
-        if abs(self.xPos) > 500: 
-            if x > 0 : self.xPos = 400
-            else: self.xPos = -400
+        if abs(self.xPos) > riversize / 2: 
+            if x > 0 : self.xPos = riversize / 2
+            else: self.xPos = 0 - riversize / 2
 
 
     def updateVis(self):
@@ -208,9 +215,6 @@ class Player():
             self.surface = pygame.transform.rotate(self.img, -15)
 
         self.lasthit = time.time()
-        print(time.time()-self.lasthit)
-
-        pass
 
 
 river = Road()
@@ -234,7 +238,7 @@ while True:
         countdownS = 100
 
     if countdownR <= 0:
-        rocks.append(Rock(river.size,smallRocks[randint(0,3)]))
+        rocks.append(Rock(smallRocks[randint(0,3)]))
         countdownR = 90
 
     if countdownW <= 0:
@@ -250,7 +254,7 @@ while True:
             exit()
    
     inputX = getInput(usesJoystick)
-    raft.updatePos(inputX)
+    raft.update(inputX)
 
     screen.blit(sky_surface, (0, 0)) 
     pygame.draw.polygon(screen,'BLUE',river.pos(raft.xPos))
