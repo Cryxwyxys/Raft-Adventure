@@ -64,17 +64,6 @@ else:
     usesJoystick = False
 
 
-def getInput(usesJoystick):
-
-    if(usesJoystick):
-        joystickX = round(joystick.get_axis(0),2) 
-        inputX = joystickX * sWidth / 2
-
-    else:
-        inputX = pygame.mouse.get_pos()[0] - sWidth / 2
-
-    return inputX
-
 
 class Road():
 
@@ -93,7 +82,7 @@ class Road():
 
 class MovingObject():
 
-    def __init__(self, riverSize, width):
+    def __init__(self, width):
         self.zPos = 1000
         self.riverSize = riverSize
         self.offset = randint(int(sWidth/2-riverSize/2 + width/2), int(sWidth/2 + riverSize/2 - width/2))
@@ -107,7 +96,6 @@ class MovingObject():
         return self.river.offsetFactor * y + sWidth / 2 + scaled
 
     def update(self, river, speed):
-        self.river = river
         self.zPos -= speed / self.zPos * 1000
         self.yPos = sHeight - self.zPos * sHeight / 1000
         self.xPos = self.xAt(self.yPos) 
@@ -128,10 +116,10 @@ class Rock(MovingObject):
         self.height = img.get_height()
         self.mod = (1000 - self.zPos) / 1000
         self.hitbox = self.img.get_rect()
-        super().__init__(riversize, self.width)
+        super().__init__( self.width)
 
-    def update(self, river, speed):
-        super().update(river, speed)  # topmiddle
+    def update(self, speed):
+        super().update( speed)  # topmiddle
         self.mod = (1000 - self.zPos) / 1000
         if self.mod < 0:
             self.mod = 0
@@ -147,19 +135,17 @@ class Rock(MovingObject):
 
 class Wall(Rock):
 
-    def __init__(self, riversize, img, right):
+    def __init__(self, img, right):
         super().__init__( img)
         if right: 
             self.offset = sWidth/2 + riversize / 2 + self.width / 2
-            print("kms")
         else:
             self.offset = sWidth/2 - riversize / 2 - self.width / 2
             self.img = pygame.transform.flip(img, True, False)
             self.orig_img = self.img
-            print("hä")
 
-    def update(self, river, speed):
-        super().update(river, speed)            # Rock.update: setzt Größe + self.yPos aufs Zentrum
+    def update(self, speed):
+        super().update(speed)            # Rock.update: setzt Größe + self.yPos aufs Zentrum
         bottom_y = self.yPos + self.height / 2   # unteres, spielernahes Ende statt oberer Sprite-Kante
         self.xPos = self.xAt(bottom_y)
         self.hitbox.centerx = self.xPos
@@ -217,69 +203,101 @@ class Player():
         self.lasthit = time.time()
 
 
-river = Road()
-raft = Player()
-joystickX = 0
-speed = 1
-countdownS = 100000
-countdownR = 0
-countdownW = 0
-rocks = []
-walls = []
+class RunningGame():
 
-while True:
+    def __init__(self):
 
-    countdownS -= 1
-    countdownR -= speed
-    countdownW -= speed
+        self.river = Road()
+        self.raft = Player()
+        self.joystickX = 0
+        self.speed = 1
+        self.countdownS = 100000
+        self.countdownR = 0
+        self.countdownW = 0
+        self.rocks = []
 
-    if countdownS == 0:
-        speed += 1
-        countdownS = 100
+    def events(self):
 
-    if countdownR <= 0:
-        rocks.append(Rock(smallRocks[randint(0,3)]))
-        countdownR = 90
-
-    if countdownW <= 0:
-        walls.append(Wall(river.size,wall[randint(0,3)],0))
-        walls.append(Wall(river.size,wall[randint(0,3)],1))
-
-        countdownW = 20
-
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
    
-    inputX = getInput(usesJoystick)
-    raft.update(inputX)
+        self.inputX = self.getInput(usesJoystick)
+        self.countdownS -= 1
+        self.countdownR -= self.speed
+        self.countdownW -= self.speed
 
-    screen.blit(sky_surface, (0, 0)) 
-    pygame.draw.polygon(screen,'BLUE',river.pos(raft.xPos))
+    
 
-    for cliff in walls:
-        cliff.update(river, speed)
-        screen.blit(cliff.img, cliff.hitbox)
+    def getInput(self, usesJoystick):
 
-    for i in range(len(rocks)):
-        rocks[i].update(river, speed)
-        screen.blit(rocks[i].img, rocks[i].hitbox)
-       
-    if rocks[0].yPos + rocks[0].height/2 >= sHeight: 
-        if rocks[0].detectCol(raft):
-            raft.damage(rocks[0].xPos)
-        rocks.pop(0)
+        if(usesJoystick):
+            self.joystickX = round(joystick.get_axis(0),2) 
+            self.inputX = self.joystickX * sWidth / 2
 
-    if walls[0].yPos + walls[0].height/2 >= sHeight: 
-        
+        else:
+            self.inputX = pygame.mouse.get_pos()[0] - sWidth / 2
 
-        if walls[0].detectCol(raft) :
-            raft.damage(walls[0].hitbox.centerx)
-        walls.pop(0)
+    def spawnRocks(self):
+        if self.countdownS == 0:
+            self.speed += 1
+            self.countdownS = 100
 
-    screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
+        if self.countdownR <= 0:
+            self.rocks.append(Rock(smallRocks[randint(0,3)]))
+            self.countdownR = 90
 
-    pygame.display.update()
-    clock.tick(60)
+        if self.countdownW <= 0:
+            self.rocks.append(Wall(wall[randint(0,3)],0))
+            self.rocks.append(Wall(wall[randint(0,3)],1))
+
+            self.countdownW = 20
+
+    def update(self):
+
+            for i in range(len(rocks)):
+                rocks[i].update(self.speed)
+
+            self.raft.update(self.inputX)
+
+    def doCol(self):
+
+        for i in range(len(self.rocks), 0 , -1):
+            if self.rocks[0].yPos + self.rocks[0].height/2 >= sHeight: 
+                if self.rocks[0].detectCol(raft):
+                    self.raft.damage(rocks[0].xPos)
+
+    def render(self):
+
+        screen.blit(sky_surface, (0, 0)) 
+        pygame.draw.polygon(screen,'BLUE',river.pos(raft.xPos))
+
+        for rock in self.rocks:
+            screen.blit(rocks[i].img, rocks[i].hitbox)
+
+        screen.blit(raft.surface,((sWidth-raft.width)/2,sHeight-raft.height))
+
+        pygame.display.update()
+
+    def run(self):
+
+        self.running = True
+        while True:
+
+            self.doATick()
+            clock.tick(60)
+
+    def doATick(self):
+
+        self.events()
+        self.spawnRocks()
+        self.update()
+        self.doCol()
+        self.render()
+
+
+
+if  __name__ == "main":
+    p = Game()
+    p.run()
