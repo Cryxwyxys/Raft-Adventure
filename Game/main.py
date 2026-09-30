@@ -67,6 +67,7 @@ else:
 
 
 
+
 class Road():
 
     def __init__(self):
@@ -102,6 +103,41 @@ class MovingObject():
             return True
 
         return False
+    
+    def rezise(self): #fixme
+        newWidth = self.width / self.zPos / 2 * sWidth
+        return newWidth
+
+    def renderY(self):
+        height = self.zPos * 3 #lowest to highest point that can be seen by Player
+        y = height / 2 - 100 # how much the Player is above water level
+        mod = sHeight / height #pixel pro höhe
+
+        visY =  mod * (height - y)
+
+        return visY
+
+    def renderX(self, xPlayer):
+        #print("new render")
+        width = self.zPos * 2 #left to right point that can be seen by Player
+        x = width / 2 + xPlayer - self.xPos # how much the Player and the rock are offset from the center
+        mod = sWidth / width #pixel pro höhe
+
+        visX =  mod * (width - x)
+
+        return visX
+
+    def render(self, xPlayer):   #returns a new rectangle
+        yObj = self.hitbox.centery
+        newWidth = self.rezise()
+        visX = self.renderX(xPlayer)
+        visY = self.renderY()
+        self.y =  visY 
+        return pygame.Rect(visX - newWidth / 2, self.hitbox.height * newWidth / self.hitbox.width+ visY , newWidth, self.hitbox.height * newWidth / self.hitbox.width)
+
+    def __del__(self):
+        print(f"z pos = {self.zPos} & yPos = {self.y}")
+        
 
 
 class Rock(MovingObject):
@@ -118,9 +154,12 @@ class Rock(MovingObject):
     def update(self, speed):
         super().update(speed)  
 
-        def __del__(self):
-            pass
+    def render(self, xPlayer):
+        
+        return super().render(xPlayer)
 
+    def __del__(self):
+        super().__del__()
 
 class Wall(Rock):
 
@@ -137,6 +176,10 @@ class Wall(Rock):
 
     def update(self, speed):
         super().update(speed)
+
+    def render(self, xPlayer):
+
+        return super().render(xPlayer)
 
 
 class Player():
@@ -257,7 +300,7 @@ class RunningGame():
             temp = len(self.obstacles)
 
             for i in range(temp):
-                if self.obstacles[i].hitbox.top > sHeight:
+                if self.obstacles[i].zPos < 100:
                     self.obstacles.pop(i)
                     i -= 1
                     temp -= 1
@@ -275,9 +318,11 @@ class RunningGame():
         screen.blit(sky_surface, (0, 0)) 
 
         for rock in self.obstacles:
-            screen.blit(rock.img, rock.hitbox)
+            visRect = rock.render(self.raft.xPos)
+            rock.img = pygame.transform.scale(rock.referenceImg, (visRect.width, visRect.height))
+            screen.blit(rock.img, visRect)
         
-        screen.blit(self.raft.surface, self.raft.hitbox)
+        screen.blit(self.raft.surface, (sWidth / 2 , sHeight - self.raft.height))
 
         pygame.display.update()
 
