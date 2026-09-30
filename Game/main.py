@@ -5,7 +5,12 @@ import time
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+global debugMode
 
+if input("enter debugmode?") =="y":
+    debugMode = True
+else:
+     debugMode = False
 
 global sWidth
 global sHeight
@@ -14,7 +19,7 @@ sHeight = 1080
 
 global riversize
 
-riversize = 0.8 * sWidth
+riversize = 0.5 * sWidth
 
 global rockWidth 
 global bigRockHeight 
@@ -136,7 +141,7 @@ class MovingObject():
         return pygame.Rect(visX - newWidth / 2, self.hitbox.height * newWidth / self.hitbox.width+ visY , newWidth, self.hitbox.height * newWidth / self.hitbox.width)
 
     def __del__(self):
-        print(f"z pos = {self.zPos} & yPos = {self.y}")
+        pass
         
 
 
@@ -173,6 +178,7 @@ class Wall(Rock):
             self.referenceImg = self.img
 
         self.hitbox.x = self.xPos - self.width / 2
+        self.zPos = 800
 
     def update(self, speed):
         super().update(speed)
@@ -289,7 +295,7 @@ class RunningGame():
             self.obstacles.append(Wall(walls[randint(0,3)], self.river, False))
             self.obstacles.append(Wall(walls[randint(0,3)], self.river, True))
 
-            self.countdownW = 20
+            self.countdownW = 50
 
     def update(self):
 
@@ -304,26 +310,30 @@ class RunningGame():
                     self.obstacles.pop(i)
                     i -= 1
                     temp -= 1
-                else: break
+                else:break
 
     def doCol(self):
 
         for i in range(len(self.obstacles)):
             if self.obstacles[i].detectCol(self.raft):
                 self.raft.damage(self.obstacles[i].xPos)
-            else: break
 
     def render(self):
 
         screen.blit(sky_surface, (0, 0)) 
 
-        for rock in self.obstacles:
+        for i in range(len(self.obstacles) - 1, 0 , -1):
+            rock = self.obstacles[i]
             visRect = rock.render(self.raft.xPos)
             rock.img = pygame.transform.scale(rock.referenceImg, (visRect.width, visRect.height))
             screen.blit(rock.img, visRect)
         
-        screen.blit(self.raft.surface, (sWidth / 2 , sHeight - self.raft.height))
+        if debugMode:
+            for o in self.obstacles:
+                pygame.draw.rect(screen, 'RED', o.hitbox, 2)
+            pygame.draw.rect(screen, 'RED', self.raft.hitbox, 2)
 
+        screen.blit(self.raft.surface, (sWidth / 2 , sHeight - self.raft.height))
         pygame.display.update()
 
     def run(self):
@@ -346,3 +356,4 @@ class RunningGame():
 if  __name__ == "__main__":
     p = RunningGame()
     p.run()
+
