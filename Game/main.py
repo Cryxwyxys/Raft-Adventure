@@ -81,58 +81,56 @@ class Road():
 
 class MovingObject():
 
-    def __init__(self, river, width):
+    def __init__(self, river, rect):
         self.zPos = 1000
-        self.xPos = randint(int((sWidth - river.size + width) / 2), int((sWidth + river.size - width ) / 2))
+        self.xPos = randint(int((sWidth - river.size + rect.width) / 2), int((sWidth + river.size - rect.width ) / 2))
         self.xRenderPos = 0
         self.yRenderPos = 0
-        self.width = width
-        self.hitbox = pygame.Rect(self.xPos - width / 2, 0, width, 50)
+        self.OgWidth = rect.width
+        self.OgHeight = rect.height
+        self.hitbox = pygame.Rect(self.xPos - rect.width / 2, 0, rect.width, rect.height)
 
-    def update(self, speed):
+    def update(self, speed, xPlayer):
         self.move(speed)
+        self.hitbox = newHitbox(xPlayer)
 
     def move(self, speed):
         self.zPos -= speed
-        self.hitbox.bottom += speed
 
     def detectCol(self, obj):
         if self.hitbox.colliderect(obj.hitbox):
-            print("col")
+
             return True
 
         return False
     
-    def rezise(self): #fixme
+    def rezise(self): 
         newWidth = self.width / self.zPos / 2 * sWidth
         return newWidth
 
-    def renderY(self):
+    def _getY_(self):
         height = self.zPos * 3 #lowest to highest point that can be seen by Player
         y = height / 2 - 100 # how much the Player is above water level
         mod = sHeight / height #pixel pro höhe
 
-        visY =  mod * (height - y)
+        newY =  mod * (height - y)
 
-        return visY
+        return newY
 
-    def renderX(self, xPlayer):
-        #print("new render")
+    def _getX_(self, xPlayer):
         width = self.zPos * 2 #left to right point that can be seen by Player
         x = width / 2 + xPlayer - self.xPos # how much the Player and the rock are offset from the center
         mod = sWidth / width #pixel pro höhe
 
-        visX =  mod * (width - x)
+        newX =  mod * (width - x)
 
-        return visX
+        return newX
 
-    def render(self, xPlayer):   #returns a new rectangle
-        yObj = self.hitbox.centery
+    def newHitbox(self, xPlayer):   #returns a new rectangle
         newWidth = self.rezise()
-        visX = self.renderX(xPlayer)
-        visY = self.renderY()
-        self.y =  visY 
-        return pygame.Rect(visX - newWidth / 2, self.hitbox.height * newWidth / self.hitbox.width+ visY , newWidth, self.hitbox.height * newWidth / self.hitbox.width)
+        newX = self._getX_(xPlayer)
+        newY = self._getY_()
+        return pygame.Rect(newX - newWidth / 2, self.OgHeight * newWidth / self.OgWidth + newY , newWidth, self.OgHeight * newWidth / self.OgWidth)
 
     def __del__(self):
         pass
@@ -143,19 +141,15 @@ class Rock(MovingObject):
 
     def __init__(self, img, river):
 
-        self.width = img.get_width()
-        super().__init__(river, self.width)
+        self.rect = img.get_rect()
+        super().__init__(river, self.rect)
 
         self.referenceImg = img  # keep the original, unscaled image around to prevent quality loss (im a retard)
         self.img = img
         self.height = img.get_height()
 
-    def update(self, speed):
-        super().update(speed)  
-
-    def render(self, xPlayer):
-        
-        return super().render(xPlayer)
+    def update(self, speed, xPlayer):
+        super().update(speed, xPlayer)  
 
     def __del__(self):
         super().__del__()
@@ -165,21 +159,17 @@ class Wall(Rock):
     def __init__(self, img, river, right):
         super().__init__(img, river)
         if right: 
-            self.xPos = sWidth/2 + riversize / 2 + self.width / 2
+            self.xPos = sWidth/2 + riversize / 2 + self.rect.width / 2
         else:
-            self.xPos = sWidth/2 - riversize / 2 - self.width / 2
+            self.xPos = sWidth/2 - riversize / 2 - self.rect.width / 2
             self.img = pygame.transform.flip(img, True, False)
             self.referenceImg = self.img
 
-        self.hitbox.x = self.xPos - self.width / 2
         self.zPos = 800
 
     def update(self, speed):
         super().update(speed)
 
-    def render(self, xPlayer):
-
-        return super().render(xPlayer)
 
 
 class Player():
@@ -294,7 +284,7 @@ class RunningGame():
     def update(self):
 
             for i in range(len(self.obstacles)):
-                self.obstacles[i].update(self.speed)
+                self.obstacles[i].update(self.speed, self.raft.xPos)
             self.raft.update(self.inputX)
 
             temp = len(self.obstacles)
@@ -313,7 +303,7 @@ class RunningGame():
 
         for i in range(len(self.obstacles) - 1, -1 , -1):
             rock = self.obstacles[i]
-            visRect = rock.render(self.raft.xPos)
+            visRect = rock.hitbox
             rock.img = pygame.transform.scale(rock.referenceImg, (visRect.width, visRect.height))
             screen.blit(rock.img, visRect)
         
