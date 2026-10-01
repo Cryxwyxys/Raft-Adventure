@@ -5,12 +5,6 @@ import time
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-global debugMode
-
-if input("enter debugmode?") =="y":
-    debugMode = True
-else:
-     debugMode = False
 
 global sWidth
 global sHeight
@@ -305,12 +299,7 @@ class RunningGame():
 
             temp = len(self.obstacles)
 
-            for i in range(temp):
-                if self.obstacles[i].zPos < 100:
-                    self.obstacles.pop(i)
-                    i -= 1
-                    temp -= 1
-                else:break
+            self.obstacles = [o for o in self.obstacles if o.zPos >= 100]
 
     def doCol(self):
 
@@ -322,16 +311,12 @@ class RunningGame():
 
         screen.blit(sky_surface, (0, 0)) 
 
-        for i in range(len(self.obstacles) - 1, 0 , -1):
+        for i in range(len(self.obstacles) - 1, -1 , -1):
             rock = self.obstacles[i]
             visRect = rock.render(self.raft.xPos)
             rock.img = pygame.transform.scale(rock.referenceImg, (visRect.width, visRect.height))
             screen.blit(rock.img, visRect)
         
-        if debugMode:
-            for o in self.obstacles:
-                pygame.draw.rect(screen, 'RED', o.hitbox, 2)
-            pygame.draw.rect(screen, 'RED', self.raft.hitbox, 2)
 
         screen.blit(self.raft.surface, (sWidth / 2 , sHeight - self.raft.height))
         pygame.display.update()
