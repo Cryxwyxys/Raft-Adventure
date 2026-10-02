@@ -70,13 +70,37 @@ class Road():
 
     def __init__(self):
         self.size = riversize
-        self.lenght = sHeight
-        self.rect = pygame.Rect(sWidth / 2 - self.size / 2, 0 , self.size, 50)
-        self.points = []
+        self.zPos = 1000
+        self.right = sWidth / 2 + riversize / 2
+        self.left = sWidth / 2 - riversize / 2
+        y = self._getY_()
+        xLeft = self._getX_(0, self.left)
+        xRight = self._getX_(0, self.right)
+        self.points = [[self.left, sHeight], [self.right, sHeight], [xRight , y], [xLeft, y]]
+
+    def update(self, xPlayer):
+        
+
 
     def render(self,x):
         pass
 
+    def _getY_(self):
+        height = self.zPos * 3 #lowest to highest point that can be seen by Player
+        y = height / 2 - 200 # how much the Player is above water level
+        mod = sHeight / height #pixel pro höhe
+        newY =  mod * (height - y)
+
+        return newY
+
+    def _getX_(self, xPlayer, xPos):
+        width = self.zPos * 2 #left to right point that can be seen by Player
+        x = width / 2 + xPlayer - xPos # how much the Player and the rock are offset from the center
+        mod = sWidth / width #pixel pro höhe
+
+        newX =  mod * (width - x)
+
+        return newX
 
 class MovingObject():
 
@@ -304,7 +328,7 @@ class RunningGame():
     def render(self):
 
         screen.blit(sky_surface, (0, 0)) 
-
+        pygame.draw.polygon(screen, 'BLUE', self.river.points, 0)
         for i in range(len(self.obstacles) - 1, -1 , -1):
             rock = self.obstacles[i]
             visRect = rock.hitbox
