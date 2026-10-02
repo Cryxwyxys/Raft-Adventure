@@ -19,7 +19,7 @@ global rockWidth
 global bigRockHeight 
 global smallRockHeight 
 
-rockWidth = 0.2 * sWidth
+rockWidth = 0.1 * sWidth
 bigRockHeight = 200
 smallRockHeight = 100
 
@@ -52,7 +52,6 @@ walls.append(pygame.image.load('Assets/graphics/Rocks/wall5.png').convert_alpha(
 walls.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha())
 walls.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
 for i in range(len(walls)): walls[i] = pygame.transform.scale(walls[i], (200, 400))
- 
 
 
 
@@ -83,6 +82,7 @@ class MovingObject():
 
     def __init__(self, river, rect):
         self.zPos = 1000
+        self.rect = rect
         self.xPos = randint(int((sWidth - river.size + rect.width) / 2), int((sWidth + river.size - rect.width ) / 2))
         self.xRenderPos = 0
         self.yRenderPos = 0
@@ -92,7 +92,8 @@ class MovingObject():
 
     def update(self, speed, xPlayer):
         self.move(speed)
-        self.hitbox = newHitbox(xPlayer)
+        self.hitbox = self.newHitbox(xPlayer)
+        self.img = pygame.transform.scale(self.referenceImg, (self.hitbox.width, self.hitbox.height))
 
     def move(self, speed):
         self.zPos -= speed
@@ -105,14 +106,13 @@ class MovingObject():
         return False
     
     def rezise(self): 
-        newWidth = self.width / self.zPos / 2 * sWidth
+        newWidth = self.OgWidth / self.zPos / 4  * sWidth
         return newWidth
 
     def _getY_(self):
         height = self.zPos * 3 #lowest to highest point that can be seen by Player
-        y = height / 2 - 100 # how much the Player is above water level
+        y = height / 2 - 200 # how much the Player is above water level
         mod = sHeight / height #pixel pro höhe
-
         newY =  mod * (height - y)
 
         return newY
@@ -130,7 +130,7 @@ class MovingObject():
         newWidth = self.rezise()
         newX = self._getX_(xPlayer)
         newY = self._getY_()
-        return pygame.Rect(newX - newWidth / 2, self.OgHeight * newWidth / self.OgWidth + newY , newWidth, self.OgHeight * newWidth / self.OgWidth)
+        return pygame.Rect(newX - newWidth / 2, newY - self.OgHeight * newWidth / self.OgWidth / 2, newWidth, self.OgHeight * newWidth / self.OgWidth)
 
     def __del__(self):
         pass
@@ -151,6 +151,7 @@ class Rock(MovingObject):
     def update(self, speed, xPlayer):
         super().update(speed, xPlayer)  
 
+
     def __del__(self):
         super().__del__()
 
@@ -158,17 +159,22 @@ class Wall(Rock):
 
     def __init__(self, img, river, right):
         super().__init__(img, river)
+ 
         if right: 
             self.xPos = sWidth/2 + riversize / 2 + self.rect.width / 2
+            pass
         else:
             self.xPos = sWidth/2 - riversize / 2 - self.rect.width / 2
             self.img = pygame.transform.flip(img, True, False)
             self.referenceImg = self.img
+            pass
 
-        self.zPos = 800
 
-    def update(self, speed):
-        super().update(speed)
+    def update(self, speed, xPlayer):
+        super().update(speed, xPlayer)
+        
+
+
 
 
 
@@ -272,14 +278,14 @@ class RunningGame():
             self.countdownS = 100
 
         if self.countdownR <= 0:
-            self.obstacles.append(Rock(smallRocks[randint(0,3)], self.river))
-            self.countdownR = 90
+            for i in range(2): self.obstacles.append(Rock(smallRocks[randint(0,3)], self.river))
+            self.countdownR = 200
 
         if self.countdownW <= 0:
             self.obstacles.append(Wall(walls[randint(0,3)], self.river, False))
             self.obstacles.append(Wall(walls[randint(0,3)], self.river, True))
 
-            self.countdownW = 50
+            self.countdownW = 25
 
     def update(self):
 
@@ -287,9 +293,7 @@ class RunningGame():
                 self.obstacles[i].update(self.speed, self.raft.xPos)
             self.raft.update(self.inputX)
 
-            temp = len(self.obstacles)
-
-            self.obstacles = [o for o in self.obstacles if o.zPos >= 100]
+            self.obstacles = [o for o in self.obstacles if o.zPos >= 150 and o.hitbox.centery < sHeight]
 
     def doCol(self):
 
@@ -304,7 +308,7 @@ class RunningGame():
         for i in range(len(self.obstacles) - 1, -1 , -1):
             rock = self.obstacles[i]
             visRect = rock.hitbox
-            rock.img = pygame.transform.scale(rock.referenceImg, (visRect.width, visRect.height))
+
             screen.blit(rock.img, visRect)
         
 
