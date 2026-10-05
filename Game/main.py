@@ -64,38 +64,44 @@ else:
     usesJoystick = False
 
 
+class RoadTile():
 
-
-class Road():
-
-    def __init__(self):
+    def __init__(self, z, size):
         self.size = riversize
-        self.zPos = 1000
-        self.right = sWidth / 2 + riversize / 2
+        self.zTop = z
+        self.zBottom = z -size
+        self.right = sWidth / 2 + riversize / 2 
         self.left = sWidth / 2 - riversize / 2
-        y = self._getY_()
-        xLeft = self._getX_(0, self.left)
-        xRight = self._getX_(0, self.right)
-        self.points = [[self.left, sHeight], [self.right, sHeight], [xRight , y], [xLeft, y]]
-
-    def update(self, xPlayer):
+        self.yTop = self._getY_(self.zTop)
+        self.yBottom = self._getY_(self.zBottom)
         
+        self.points = [[self._getX_(sWidth / 2 , self.left, self.zTop), self.yTop],
+                       [self._getX_(sWidth / 2 , self.right , self.zTop), self.yTop],
+                       [self._getX_(sWidth / 2, self.right, self.zBottom) , self.yBottom ],
+                       [self._getX_(sWidth / 2, self.left, self.zBottom), self.yBottom]]
 
+    def update(self, xPlayer, speed):
+        #self.zBottom -= speed
+        #self.zTop -=speed
+        self.yTop = self._getY_(self.zTop)
+        self.yBottom = self._getY_(self.zBottom)
+        
+        self.points = [[self._getX_(xPlayer, self.left, self.zTop), self.yTop],
+                       [self._getX_(xPlayer , self.right , self.zTop), self.yTop],
+                       [self._getX_(xPlayer, self.right, self.zBottom) , self.yBottom ],
+                       [self._getX_(xPlayer, self.left, self.zBottom), self.yBottom]]
 
-    def render(self,x):
-        pass
-
-    def _getY_(self):
-        height = self.zPos * 3 #lowest to highest point that can be seen by Player
+    def _getY_(self, z):
+        height = z * 3 #lowest to highest point that can be seen by Player
         y = height / 2 - 200 # how much the Player is above water level
         mod = sHeight / height #pixel pro höhe
         newY =  mod * (height - y)
 
         return newY
 
-    def _getX_(self, xPlayer, xPos):
-        width = self.zPos * 2 #left to right point that can be seen by Player
-        x = width / 2 + xPlayer - xPos # how much the Player and the rock are offset from the center
+    def _getX_(self, xPlayer, xPos, z):
+        width = z * 2 #left to right point that can be seen by Player
+        x = width / 2 + xPlayer - xPos
         mod = sWidth / width #pixel pro höhe
 
         newX =  mod * (width - x)
@@ -104,10 +110,10 @@ class Road():
 
 class MovingObject():
 
-    def __init__(self, river, rect):
+    def __init__(self, rect):
         self.zPos = 1000
         self.rect = rect
-        self.xPos = randint(int((sWidth - river.size + rect.width) / 2), int((sWidth + river.size - rect.width ) / 2))
+        self.xPos = randint(int((sWidth - riversize + rect.width) / 2), int((sWidth + riversize - rect.width ) / 2))
         self.xRenderPos = 0
         self.yRenderPos = 0
         self.OgWidth = rect.width
@@ -163,10 +169,10 @@ class MovingObject():
 
 class Rock(MovingObject):
 
-    def __init__(self, img, river):
+    def __init__(self, img):
 
         self.rect = img.get_rect()
-        super().__init__(river, self.rect)
+        super().__init__(self.rect)
 
         self.referenceImg = img  # keep the original, unscaled image around to prevent quality loss (im a retard)
         self.img = img
@@ -181,8 +187,9 @@ class Rock(MovingObject):
 
 class Wall(Rock):
 
-    def __init__(self, img, river, right):
-        super().__init__(img, river)
+    def __init__(self, img, right):
+        super().__init__(img)
+        self.zPos = 1200
  
         if right: 
             self.xPos = sWidth/2 + riversize / 2 + self.rect.width / 2
@@ -197,9 +204,6 @@ class Wall(Rock):
     def update(self, speed, xPlayer):
         super().update(speed, xPlayer)
         
-
-
-
 
 
 class Player():
@@ -229,8 +233,8 @@ class Player():
     def updatePos(self, x):
         self.xPos += (int(x) / 50)
 
-        if self.xPos > sWidth / 2 + riversize / 2 : self.xPos = sWidth / 2 + riversize / 2
-        if self.xPos < sWidth / 2 - riversize / 2 : self.xPos = sWidth / 2 - riversize / 2
+        if self.xPos > sWidth / 2 + riversize / 2 - self.width / 2: self.xPos = sWidth / 2 + riversize / 2 -self.width / 2
+        if self.xPos < sWidth / 2 - riversize / 2 + self.width / 2: self.xPos = sWidth / 2 - riversize / 2 +self.width / 2
 
         self.hitbox.update(self.xPos - self.width / 2, self.hitbox.top, self.width, self.height) 
 
@@ -240,8 +244,6 @@ class Player():
             self.surface = self.img
 
         pygame.draw.rect(screen, 'RED', self.hitbox, 10, 10)
-
-
 
     def damage(self, x):
 
@@ -262,7 +264,11 @@ class RunningGame():
 
     def __init__(self):
 
-        self.river = Road()
+        self.river = []
+        tilesize = 20
+        for i in range(100, 1000, tilesize): 
+            self.river.append(RoadTile(i, tilesize))
+        
         self.raft = Player()
         self.joystickX = 0
         self.speed = 1
@@ -296,22 +302,24 @@ class RunningGame():
             self.inputX = temp[0] - sWidth / 2
             
 
-    def spawnRocks(self):
+    def spawnStuff(self):
         if self.countdownS == 0:
             self.speed += 1
             self.countdownS = 100
 
         if self.countdownR <= 0:
-            for i in range(2): self.obstacles.append(Rock(smallRocks[randint(0,3)], self.river))
+            for i in range(2): self.obstacles.append(Rock(smallRocks[randint(0,3)] ))
             self.countdownR = 200
 
         if self.countdownW <= 0:
-            self.obstacles.append(Wall(walls[randint(0,3)], self.river, False))
-            self.obstacles.append(Wall(walls[randint(0,3)], self.river, True))
+            self.obstacles.append(Wall(walls[randint(0,3)],  False))
+            self.obstacles.append(Wall(walls[randint(0,3)],  True))
 
             self.countdownW = 25
 
     def update(self):
+            for r in self.river:
+                r.update(self.raft.xPos, self.speed)
 
             for i in range(len(self.obstacles)):
                 self.obstacles[i].update(self.speed, self.raft.xPos)
@@ -328,14 +336,15 @@ class RunningGame():
     def render(self):
 
         screen.blit(sky_surface, (0, 0)) 
-        pygame.draw.polygon(screen, 'BLUE', self.river.points, 0)
-        for i in range(len(self.obstacles) - 1, -1 , -1):
-            rock = self.obstacles[i]
-            visRect = rock.hitbox
-
-            screen.blit(rock.img, visRect)
+        for r in self.river:
+            pygame.draw.polygon(screen,'BLUE', r.points, 0)
         
+        for i in range(len(self.obstacles) - 1, -1 , -1):
+            r = self.obstacles[i]
 
+            screen.blit(r.img, r.hitbox) 
+
+    
         screen.blit(self.raft.surface, (sWidth / 2 , sHeight - self.raft.height))
         pygame.display.update()
 
@@ -350,7 +359,7 @@ class RunningGame():
     def doATick(self):
 
         self.events()
-        self.spawnRocks()
+        self.spawnStuff()
         self.update()
         self.doCol()
         self.render()
@@ -359,4 +368,6 @@ class RunningGame():
 if  __name__ == "__main__":
     p = RunningGame()
     p.run()
+
+
 
