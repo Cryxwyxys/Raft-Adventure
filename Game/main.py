@@ -217,7 +217,7 @@ class Player():
         self.surface = pygame.image.load('Assets/graphics/raft.png').convert_alpha()
         self.surface = pygame.transform.scale(self.surface,(self.width, self.height))
         self.hitbox = self.surface.get_rect()
-        self.hitbox.center = (sWidth/2, sHeight - self.height/2)
+        self.hitbox.center = (sWidth/2 + self.width / 2, sHeight - self.height/2)
         self.img = self.surface
 
         self.invisFrames = 3
@@ -236,7 +236,6 @@ class Player():
         if self.xPos > sWidth / 2 + riversize / 2 - self.width / 2: self.xPos = sWidth / 2 + riversize / 2 -self.width / 2
         if self.xPos < sWidth / 2 - riversize / 2 + self.width / 2: self.xPos = sWidth / 2 - riversize / 2 +self.width / 2
 
-        self.hitbox.update(self.xPos - self.width / 2, self.hitbox.top, self.width, self.height) 
 
     def updateVis(self):
 
@@ -341,7 +340,6 @@ class RunningGame():
         
         for i in range(len(self.obstacles) - 1, -1 , -1):
             r = self.obstacles[i]
-
             screen.blit(r.img, r.hitbox) 
 
     
