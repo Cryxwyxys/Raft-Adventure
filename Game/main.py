@@ -392,6 +392,9 @@ class RunningGame():
 if  __name__ == "__main__":
     startButton = Buttons.Button(sWidth / 2, sHeight / 2, 400,200,screen, "Assets/graphics/Buttons/redButton.png", "Assets/graphics/Buttons/redButtonPressed.png" )
     started = False
+    startScreen = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
+    startScreen = pygame.transform.scale(startScreen,  (sWidth, sHeight))
+    screen.blit(startScreen, (0,0))
     while not started:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
