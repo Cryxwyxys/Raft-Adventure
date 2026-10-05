@@ -2,6 +2,7 @@ from random import randint
 import pygame
 import os
 import time
+import Buttons
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 global playerHeight
@@ -284,7 +285,7 @@ class RunningGame():
         self.raft = Player()
         self.joystickX = 0
         self.speed = 1
-        self.countdownS = 100000
+        self.countdownS = 600
         self.countdownR = 0
         self.countdownW = 0
         self.obstacles = []
@@ -300,8 +301,6 @@ class RunningGame():
         self.countdownS -= 1
         self.countdownR -= self.speed
         self.countdownW -= self.speed
-
-    
 
     def getInput(self, usesJoystick):
 
@@ -372,6 +371,7 @@ class RunningGame():
             clock.tick(60)
 
     def death(self):
+
         name = input("enter name:")
         return [name, self.score]
 
@@ -381,15 +381,28 @@ class RunningGame():
         self.spawnStuff()
         self.update()
         self.doCol()
-        if self.raft.hp:
-            self.render()
-        else: 
+        self.render()
+
+        if not self.raft.hp:
             r = self.death()
             return r
 
 
 
 if  __name__ == "__main__":
+    startButton = Buttons.Button(sWidth / 2, sHeight / 2, 400,200,screen, "Assets/graphics/Buttons/redButton.png", "Assets/graphics/Buttons/redButtonPressed.png" )
+    started = False
+    while not started:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+        startButton.render()
+        pygame.display.update()
+        if startButton.isClicked():
+            started = True
+
     p = RunningGame()
     score = p.run()
     print(score)

@@ -2,39 +2,25 @@
 
 import pygame
 import os
-import time # for debugging, can probably removed in the end
 
-pygame.init()
-
-
-clock = pygame.time.Clock()
-screen = pygame.display.set_mode((1000, 1000))
-
-pygame.display.set_caption("Raft1")
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class Button():
     
-    def __init__(self, xMiddle, yMiddle, width, height, surface):
+    def __init__(self, xMiddle, yMiddle, width, height, screen, normalImg, hoveringImg):
         self.xMiddle = xMiddle
         self.yMiddle = yMiddle
         self.width = width
         self.height = height
-        self.surface = pygame.image.load('Assets/graphics/Buttons/redButton.png').convert()
-
+        self.imgN = pygame.image.load(normalImg).convert()
+        self.imgP = pygame.image.load(hoveringImg).convert()
+        self.imgN = pygame.transform.scale(self.imgN, (width, height))
+        self.imgP = pygame.transform.scale(self.imgP, (width, height))
         self.rect = pygame.Rect(xMiddle - width / 2, yMiddle - height / 2, width, height)
-        self.surface = pygame.transform.scale(self.surface, (self.width, self.height))
-
-    def isHovering(self):
-        mousePos = pygame.mouse.get_pos()
-        self.hovering = self.rect.collidepoint(mousePos)
-
-    def displayHover(self):
-        self.greyOverlay = pygame.surface(self.width, self.height)
-        if isHovering():
-            self.greyoverlay
-
+        self.screen = screen
+        
+    def checkHovering(self):
+        m = pygame.mouse.get_pos()
+        self.hovering = self.rect.collidepoint(m)
 
     def isClicked(self):
         mousePos = pygame.mouse.get_pos()
@@ -44,20 +30,28 @@ class Button():
         return self.hovering and self.down
 
     def render(self):
-        screen.blit(self.surface, self.rect)
+        self.checkHovering()
+        if self.hovering:
+            self.screen.blit(self.imgP, self.rect)
+        else:
+            self.screen.blit(self.imgN, self.rect)
         
-        pygame.draw.rect(screen, 'BLACK', self.rect, 5)
-        pygame.draw.rect(screen, 'RED', self.rect, 2)
 
 
 
-testbutton = Button(50, 50 , 100, 100, "Assets/graphics/Buttons/redButton.png")
-testbutton.render()
-
-pygame.display.update()
 
 if __name__ == "__main__":
+    import time # for debugging, can probably removed in the end
+    
+    pygame.init()
+    clock = pygame.time.Clock()
+    screen = pygame.display.set_mode((1000, 1000))
+    pygame.display.set_caption("Raft1")
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    testbutton = Button(50, 50 , 100, 100, screen, "Assets/graphics/Buttons/redButton.png", "Assets/graphics/Buttons/redButtonPressed.png")
     while True: 
+        
+
 
         testbutton.render()
         pygame.display.update()
