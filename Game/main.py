@@ -4,7 +4,11 @@ import os
 import time
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+global playerHeight
+global playerWidth
 
+playerHeight = 100
+playerWidth = 200
 
 global sWidth
 global sHeight
@@ -53,13 +57,19 @@ walls.append(pygame.image.load('Assets/graphics/Rocks/wall2.png').convert_alpha(
 walls.append(pygame.image.load('Assets/graphics/Rocks/wall3.png').convert_alpha())
 for i in range(len(walls)): walls[i] = pygame.transform.scale(walls[i], (200, 400))
 
+raftSprites = []
+raftSprites.append(pygame.image.load('Assets/graphics/RaftSprites/raft2.png').convert_alpha())
+raftSprites.append(pygame.image.load('Assets/graphics/RaftSprites/raft1.png').convert_alpha())
+raftSprites.append(pygame.image.load('Assets/graphics/RaftSprites/raft0.png').convert_alpha())
+for i in range(len(raftSprites)):raftSprites[i] = pygame.transform.scale(raftSprites[i], (playerWidth, playerHeight))
 
 
 if(pygame.joystick.get_count()):
     pygame.joystick.init()
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
-    usesJoystick = True   
+    usesJoystick = True
+
 else:
     usesJoystick = False
 
@@ -209,15 +219,17 @@ class Wall(Rock):
 class Player():
 
     def __init__(self):
+        self.score = 0
         self.lives = 3
         self.xPos = sWidth / 2
-        self.health = 3
-        self.width = 150
-        self.height = 100
-        self.surface = pygame.image.load('Assets/graphics/raft.png').convert_alpha()
-        self.surface = pygame.transform.scale(self.surface,(self.width, self.height))
+        self.maxHp = 3
+        self.hp = self.maxHp
+        self.width = playerWidth
+        self.height = playerHeight
+        self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
+        self.surface = raftSprites[self.spriteNum]
         self.hitbox = self.surface.get_rect()
-        self.hitbox.center = (sWidth/2 + self.width / 2, sHeight - self.height/2)
+        self.hitbox.center = (sWidth/2 + self.width / 2, sHeight - self.height/2-100)
         self.img = self.surface
 
         self.invisFrames = 3
@@ -247,8 +259,9 @@ class Player():
     def damage(self, x):
 
         if time.time() - self.lasthit > self.invisFrames:
-            self.lives -= 1
-
+            self.hp -= 1
+            self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) ))
+            self.img = raftSprites[self.spriteNum]
             if self.xPos > x:
                 self.xPos += 100
                 self.surface = pygame.transform.rotate(self.img, 15)
@@ -262,7 +275,7 @@ class Player():
 class RunningGame():
 
     def __init__(self):
-
+        self.score = 0
         self.river = []
         tilesize = 20
         for i in range(100, 1000, tilesize): 
@@ -302,6 +315,7 @@ class RunningGame():
             
 
     def spawnStuff(self):
+
         if self.countdownS == 0:
             self.speed += 1
             self.countdownS = 100
@@ -331,7 +345,7 @@ class RunningGame():
         for i in range(len(self.obstacles)):
             if self.obstacles[i].detectCol(self.raft):
                 self.raft.damage(self.obstacles[i].xPos)
-
+                
     def render(self):
 
         screen.blit(sky_surface, (0, 0)) 
@@ -343,16 +357,23 @@ class RunningGame():
             screen.blit(r.img, r.hitbox) 
 
     
-        screen.blit(self.raft.surface, (sWidth / 2 , sHeight - self.raft.height))
+        screen.blit(self.raft.surface,  self.raft.hitbox)
         pygame.display.update()
 
     def run(self):
 
         self.running = True
         while True:
-
-            self.doATick()
+            self.score += 1
+            temp = self.doATick()
+            if self.raft.hp == 0:
+                return temp
+        if self.score > 100:
             clock.tick(60)
+
+    def death(self):
+        name = input("enter name:")
+        return [name, self.score]
 
     def doATick(self):
 
@@ -360,12 +381,18 @@ class RunningGame():
         self.spawnStuff()
         self.update()
         self.doCol()
-        self.render()
+        if self.raft.hp:
+            self.render()
+        else: 
+            r = self.death()
+            return r
+
 
 
 if  __name__ == "__main__":
     p = RunningGame()
-    p.run()
-
+    score = p.run()
+    print(score)
+    #exit()
 
 
