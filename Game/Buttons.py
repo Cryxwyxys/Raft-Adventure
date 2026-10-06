@@ -12,8 +12,8 @@ class Button():
         self.yMiddle = yMiddle
         self.width = width
         self.height = height
-        self.imgN = pygame.image.load(normalImg).convert()
-        self.imgP = pygame.image.load(hoveringImg).convert()
+        self.imgN = pygame.image.load(normalImg).convert_alpha()
+        self.imgP = pygame.image.load(hoveringImg).convert_alpha()
         self.imgN = pygame.transform.scale(self.imgN, (width, height))
         self.imgP = pygame.transform.scale(self.imgP, (width, height))
         self.rect = pygame.Rect(xMiddle - width / 2, yMiddle - height / 2, width, height)
@@ -72,9 +72,9 @@ class RestartButton(Button):
 class TextField(Button): # Vibe-Coded
 
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        self.text = "YN"
+        self.text = "enter Name"
         self.font = pygame.font.SysFont(None, 36)
-        self.active = False
+        self.active = False   #checks if textinput should go in that field
         displaytext = self.font.render(self.text, True, 'BLACK')
         textRect = displaytext.get_rect()
 
@@ -86,16 +86,15 @@ class TextField(Button): # Vibe-Coded
 
     def handleEvent(self, event): # needs to be put in the for pygame.event.get loop
         if event.type == pygame.MOUSEBUTTONDOWN:
-            self.active = self.rect.collidepoint(event.pos)   # Klick ins Feld -> Fokus an/aus
+            self.active = self.rect.collidepoint(event.pos)   #checks if the field has been selectet
 
-        elif self.active and event.type == pygame.KEYDOWN:
+        elif self.active and event.type == pygame.KEYDOWN:    #checks for backspace
             if event.key == pygame.K_BACKSPACE:
-                self.text = self.text[:-1]
-            elif event.key == pygame.K_RETURN:
-                self.active = False
+                self.text = self.text[:-1]                    #removes last char from string
 
         elif self.active and event.type == pygame.TEXTINPUT:
-            self.text += event.text   # tatsächliches Zeichen, Shift/Layout schon berücksichtigt
+            if self.text == "enter Name": self.text = ""      #QoS might optemise later 
+            self.text += event.text                           #adds textinput to text
 
     def render(self):
         super().render()  # zeichnet weiterhin imgN/imgP

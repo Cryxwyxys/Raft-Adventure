@@ -448,7 +448,7 @@ class RunningGame():
 if  __name__ == "__main__":
     startButton = Buttons.Button(sWidth / 2, sHeight / 4 * 3, 400,200,screen, "Assets/graphics/Buttons/redButton.png", "Assets/graphics/Buttons/redButtonPressed.png" )
    
-    TextField = Buttons.TextField(sWidth / 2, sHeight / 4, 300, 100, screen)
+    textField = Buttons.TextField(sWidth / 2, sHeight / 4, 300, 100, screen)
     startScreen = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
     startScreen = pygame.transform.scale(startScreen,  (sWidth, sHeight))
     while True:
@@ -459,16 +459,16 @@ if  __name__ == "__main__":
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-                TextField.handleEvent(event)
-            TextField.render()
+                textField.handleEvent(event)
+            textField.render()
             startButton.render()
             pygame.display.update()
-            if startButton.isClicked():
+            if startButton.isClicked() and textField.text != "": #prevents NULL-names to prevent score reading errors
                 started = True
 
-        p = RunningGame(TextField.text)
+        p = RunningGame(textField.text)
         p.run()
-        TextField.text = ""
+        textField.text = ""
 
     #exit()
 
