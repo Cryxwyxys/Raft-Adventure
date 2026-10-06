@@ -1,6 +1,8 @@
 # buttons for menu screens
 
 import pygame
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Button():
@@ -69,15 +71,15 @@ class RestartButton(Button):
 
 class TextField(Button): # Vibe-Coded
 
-    def __init__(self, xMiddle, yMiddle, width, height, screen, scaling):
+    def __init__(self, xMiddle, yMiddle, width, height, screen):
         self.text = "YN"
         self.font = pygame.font.SysFont(None, 36)
         self.active = False
         displaytext = self.font.render(self.text, True, 'BLACK')
         textRect = displaytext.get_rect()
 
-        super().__init__(xMiddle, yMiddle, textRect.width + 200, height, screen, scaling,
-                          'Assets/graphics/Buttons/textField.png', "Assets/graphics/Buttons/restart.png")
+        super().__init__(xMiddle, yMiddle, textRect.width + 200, height, screen,
+                          'Assets/graphics/Buttons/textField.png', "Assets/graphics/Buttons/textField.png")
 
     def checkHovering(self):
         super().checkHovering()
@@ -113,7 +115,6 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((1000, 1000))
     pygame.display.set_caption("Raft1")
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     testbutton = RestartButton(50, 50 , 100, 100, screen)
     while True: 
         
