@@ -15,6 +15,8 @@ global sWidth
 global sHeight
 sWidth = 1920
 sHeight = 1080
+#sWidth = 1280
+#sHeight = 720
 
 global riversize
 
@@ -29,6 +31,10 @@ bigRockHeight = 200
 smallRockHeight = 100
 
 pygame.init()
+
+info = pygame.display.Info()
+sWidth = info.current_w
+sHeight = info.current_h
 
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
@@ -220,7 +226,6 @@ class Wall(Rock):
 class Player():
 
     def __init__(self):
-        self.score = 0
         self.lives = 3
         self.xPos = sWidth / 2
         self.maxHp = 3
@@ -261,8 +266,11 @@ class Player():
 
         if time.time() - self.lasthit > self.invisFrames:
             self.hp -= 1
-            self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) ))
+            self.spriteNum = int(
+                self.hp / self.maxHp * (len(raftSprites) - 1)
+            )
             self.img = raftSprites[self.spriteNum]
+
             if self.xPos > x:
                 self.xPos += 100
                 self.surface = pygame.transform.rotate(self.img, 15)
@@ -277,6 +285,8 @@ class RunningGame():
 
     def __init__(self):
         self.score = 0
+        self.lastScoreTime = time.time()
+        self.font = pygame.font.Font(None, 50)
         self.river = []
         tilesize = 20
         for i in range(100, 1000, tilesize): 
@@ -285,7 +295,7 @@ class RunningGame():
         self.raft = Player()
         self.joystickX = 0
         self.speed = 1
-        self.countdownS = 600
+        self.countdownS = 10000
         self.countdownR = 0
         self.countdownW = 0
         self.obstacles = []
@@ -357,22 +367,24 @@ class RunningGame():
 
     
         screen.blit(self.raft.surface,  self.raft.hitbox)
+        self.drawScore()
         pygame.display.update()
 
     def run(self):
 
         self.running = True
+
         while True:
-            self.score += 1
             temp = self.doATick()
             if self.raft.hp == 0:
                 return temp
-        if self.score > 100:
+
             clock.tick(60)
+
 
     def death(self):
 
-        name = input("enter name:")
+        name = input("enter name:") #input name
         return [name, self.score]
 
     def doATick(self):
@@ -381,11 +393,33 @@ class RunningGame():
         self.spawnStuff()
         self.update()
         self.doCol()
+        self.updateScore()
         self.render()
 
         if not self.raft.hp:
             r = self.death()
             return r
+
+    def updateScore(self):
+        currentTime = time.time()
+
+        if currentTime - self.lastScoreTime >= 1:
+            self.score += 1
+            self.lastScoreTime = currentTime
+
+    def drawScore(self):
+        scoreText = self.font.render(f"Score: {self.score}", True, "WHITE")
+
+        scoreRect = scoreText.get_rect()
+        scoreRect.topleft = (50, 50)
+
+        pygame.draw.rect(screen, "BLACK", scoreRect.inflate(30, 20))
+
+        screen.blit(scoreText, scoreRect)
+
+
+ 
+        
 
 
 
