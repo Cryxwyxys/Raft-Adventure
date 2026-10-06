@@ -32,10 +32,6 @@ smallRockHeight = 100
 
 pygame.init()
 
-info = pygame.display.Info()
-sWidth = info.current_w
-sHeight = info.current_h
-
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
 clock = pygame.time.Clock()
@@ -444,5 +440,3 @@ if  __name__ == "__main__":
     score = p.run()
     print(score)
     #exit()
-
-
