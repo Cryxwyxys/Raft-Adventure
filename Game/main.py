@@ -45,9 +45,9 @@ sky_surface = pygame.transform.scale(sky_surface,(sWidth, sHeight))
 
 smallRocks = []
 smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock0.png').convert_alpha())
-smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock1.png').convert_alpha())
-smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock2.png').convert_alpha())
-smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRock3.png').convert_alpha())
+smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRockT1.png').convert_alpha())
+smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRockT2.png').convert_alpha())
+smallRocks.append(pygame.image.load('Assets/graphics/Rocks/smallRockT3.png').convert_alpha())
 for i in range(len(smallRocks)): smallRocks[i] = pygame.transform.scale(smallRocks[i], (rockWidth, smallRockHeight))
 
 bigRocks = []
