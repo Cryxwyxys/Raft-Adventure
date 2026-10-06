@@ -235,7 +235,7 @@ class Player():
         self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
         self.surface = raftSprites[self.spriteNum]
         self.hitbox = self.surface.get_rect()
-        self.hitbox.center = (sWidth/2, sHeight - self.height/2-100)
+        self.hitbox.center = (sWidth/2, sHeight - self.height/2)
         self.img = self.surface
 
         self.invisFrames = 3
