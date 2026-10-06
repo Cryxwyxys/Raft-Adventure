@@ -3,6 +3,7 @@ import pygame
 import os
 import time
 import Buttons
+import screens
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 global playerHeight
@@ -407,6 +408,7 @@ class RunningGame():
 
     def death(self):
         save_score(self.name, self.score)
+        
 
 
 
@@ -441,35 +443,11 @@ class RunningGame():
 
 
  
-        
-
-
-
 if  __name__ == "__main__":
-    startButton = Buttons.Button(sWidth / 2, sHeight / 4 * 3, 400,200,screen, "Assets/graphics/Buttons/redButton.png", "Assets/graphics/Buttons/redButtonPressed.png" )
-   
-    textField = Buttons.TextField(sWidth / 2, sHeight / 4, 300, 100, screen)
-    startScreen = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
-    startScreen = pygame.transform.scale(startScreen,  (sWidth, sHeight))
-    while True:
-        started = False
-        while not started:
-            screen.blit(startScreen, (0,0))
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                textField.handleEvent(event)
-            textField.render()
-            startButton.render()
-            pygame.display.update()
-            if startButton.isClicked() and textField.text != "": #prevents NULL-names to prevent score reading errors
-                started = True
-
-        p = RunningGame(textField.text)
+    instruction = screens.startScreen(sWidth, sHeight, screen)
+    if instruction[0] == "start":
+        p = RunningGame(instruction[1])
         p.run()
-        textField.text = ""
+        screens.deathScreen(sWidth, sHeight, screen)
 
-    #exit()
-
-
+    exit()
