@@ -32,6 +32,10 @@ smallRockHeight = 100
 
 pygame.init()
 
+info = pygame.display.Info()
+sWidth = info.current_w
+sHeight = info.current_h
+
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
 clock = pygame.time.Clock()
@@ -275,6 +279,34 @@ class Player():
                 self.surface = pygame.transform.rotate(self.img, -15)
 
             self.lasthit = time.time()
+def save_score(username, score):
+    file_path = "scores.txt"
+
+    scores = {}
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            for line in file:
+                line = line.strip()
+
+                if not line:
+                    continue
+
+                name, old_score = line.split("-", 1)
+                scores[name] = int(old_score)
+
+    except FileNotFoundError:
+        pass
+
+    if username not in scores or score > scores[username]:
+        scores[username] = score
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        for name, player_score in scores.items():
+            file.write(f"{name}-{player_score}\n")
+
+    print(f"Score saved: {username} - {score}")
+
 
 
 class RunningGame():
@@ -379,9 +411,10 @@ class RunningGame():
 
 
     def death(self):
+        name = input("Enter your name: ")
+        save_score(os.name, self.score)
+        return [os.name, self.score]
 
-        name = input("enter name:") #input name
-        return [name, self.score]
 
     def doATick(self):
 
@@ -443,3 +476,5 @@ if  __name__ == "__main__":
     score = p.run()
     print(score)
     #exit()
+
+
