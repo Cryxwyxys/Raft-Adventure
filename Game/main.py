@@ -279,6 +279,7 @@ class Player():
                 self.surface = pygame.transform.rotate(self.img, -15)
 
             self.lasthit = time.time()
+
 def save_score(username, score):
     file_path = "scores.txt"
     scores = {}
@@ -304,7 +305,8 @@ def save_score(username, score):
 
 class RunningGame():
 
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.score = 0
         self.lastScoreTime = time.time()
         self.font = pygame.font.Font(None, 50)
@@ -396,17 +398,15 @@ class RunningGame():
         self.running = True
 
         while True:
-            temp = self.doATick()
+            self.doATick()
             if self.raft.hp == 0:
-                return temp
+                return
 
             clock.tick(60)
 
 
     def death(self):
-        name = input("Enter your name: ")
-        save_score(name, self.score)
-        return [name, self.score]
+        save_score(self.name, self.score)
 
 
 
@@ -421,7 +421,6 @@ class RunningGame():
 
         if not self.raft.hp:
             r = self.death()
-            return r
 
     def updateScore(self):
         currentTime = time.time()
@@ -448,27 +447,29 @@ class RunningGame():
 
 if  __name__ == "__main__":
     startButton = Buttons.Button(sWidth / 2, sHeight / 4 * 3, 400,200,screen, "Assets/graphics/Buttons/redButton.png", "Assets/graphics/Buttons/redButtonPressed.png" )
-    started = False
+   
     TextField = Buttons.TextField(sWidth / 2, sHeight / 4, 300, 100, screen)
     startScreen = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
     startScreen = pygame.transform.scale(startScreen,  (sWidth, sHeight))
+    while True:
+        started = False
+        while not started:
+            screen.blit(startScreen, (0,0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                TextField.handleEvent(event)
+            TextField.render()
+            startButton.render()
+            pygame.display.update()
+            if startButton.isClicked():
+                started = True
 
-    while not started:
-        screen.blit(startScreen, (0,0))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            TextField.handleEvent(event)
-        TextField.render()
-        startButton.render()
-        pygame.display.update()
-        if startButton.isClicked():
-            started = True
+        p = RunningGame(TextField.text)
+        p.run()
+        TextField.text = ""
 
-    p = RunningGame()
-    score = p.run()
-    print(score)
     #exit()
 
 
