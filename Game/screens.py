@@ -118,13 +118,7 @@ def leaderboardScreen(sWidth, sHeight, screen):
     scoreFont = pygame.font.Font(None, 45)
     titleFont = pygame.font.Font(None, 100)
 
-    menuButton = Buttons.MenuButton(
-        sWidth / 2,
-        sHeight - 100,
-        300,
-        100,
-        screen
-    )
+    menuButton = Buttons.MenuButton(sWidth /4, sHeight/4*3, 50, 50, screen)
 
     running = True
 
@@ -152,7 +146,7 @@ def leaderboardScreen(sWidth, sHeight, screen):
         scores = load_scores()
 
         # Display top 10
-        y = 220
+        y = 270
 
         for i, (name, score) in enumerate(scores[:10]):
 
