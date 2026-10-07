@@ -406,9 +406,6 @@ class RunningGame():
     def death(self):
         save_score(self.name, self.score)
         
-
-
-
     def doATick(self):
 
         self.events()
@@ -452,19 +449,15 @@ if  __name__ == "__main__":
                 p.render()
                 pygame.image.save(screen, 'Assets/graphics/Screens/background.png')
                 instruction = ["death", instruction[1]]
-                
-
-            case "restart":
-                p = RunningGame(instruction[1])
-                p.run()
-                p.raft.hitbox.centery = sHeight+500
-                p.render()
-                pygame.image.save(screen, 'Assets/graphics/Screens/background.png')
-                instruction = ["death", instruction[1]]
             
             case "death":
                 instruction = screens.deathScreen(sWidth, sHeight, p.raft, instruction[1], screen)
 
+            case "leaderboard":
+                instruction = screens.leaderboardScreen(sWidth, sHeight, screen)
 
-    exit()
+            case "startscreen":
+                instruction = screens.startScreen(sWidth, sHeight, screen) 
 
+            case _ :            #default
+                instruction = screens.startScreen(sWidth, sHeight, screen)

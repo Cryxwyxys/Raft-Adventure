@@ -6,30 +6,13 @@ def startScreen(sWidth, sHeight, screen):
 
     startButton = Buttons.StartButton( sWidth / 2, sHeight / 4, sWidth / 5,sHeight / 8,screen)
 
-    leaderboardButton = Buttons.LeaderboardButton(
-        sWidth / 2,
-        sHeight / 4 * 3,
-        sWidth / 5,
-        sHeight / 8,
-        screen
-    )
+    leaderboardButton = Buttons.LeaderboardButton(sWidth / 2, sHeight / 4 * 3, sWidth / 5, sHeight / 8, screen)
 
-    nameField = Buttons.TextField(
-        sWidth / 2,
-        sHeight / 2,
-        sWidth / 5,
-        sHeight / 8,
-        screen
-    )
+    nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 5, sHeight / 8, screen)
 
-    img = pygame.image.load(
-        'Assets/graphics/Screens/Title.jpg'
-    ).convert()
+    img = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
 
-    img = pygame.transform.scale(
-        img,
-        (sWidth, sHeight)
-    )
+    img = pygame.transform.scale(img, (sWidth, sHeight))
 
     while True:
 
@@ -53,8 +36,7 @@ def startScreen(sWidth, sHeight, screen):
             return ["start", nameField.text]
 
         if leaderboardButton.isClicked():
-            leaderboardScreen(sWidth, sHeight, screen)
-
+            return ["leaderboard"]
 
 
 def deathScreen(sWidth, sHeight, raft, name, screen):
@@ -80,11 +62,13 @@ def deathScreen(sWidth, sHeight, raft, name, screen):
         pygame.display.update()
         clock.tick(60)
     
-    restartButton = Buttons.RestartButton(sWidth / 4, sHeight / 3 * 2, sWidth  / 6, sHeight / 5 *3, screen)
+    restartButton = Buttons.RestartButton(sWidth / 4, sHeight / 3 * 2, sWidth  / 6, sHeight / 5, screen)
+    menuButton    = Buttons.MenuButton(sWidth / 4 * 3, sHeight / 3 * 2, sWidth / 6, sHeight / 5, screen)
 
     while True:
         screen.blit(img, (0,0))
         restartButton.render()
+        menuButton.render()
         pygame.display.update()
 
         for event in pygame.event.get():
@@ -93,13 +77,10 @@ def deathScreen(sWidth, sHeight, raft, name, screen):
                 exit()
         
         if restartButton.isClicked():
-            print("fuck")
-            return ["restart",name]
+            return ["start",name]
 
-import pygame
-import Buttons
-import os
-
+        if menuButton.isClicked():
+            return ["startscreen"]
 
 def load_scores():
 
@@ -157,22 +138,14 @@ def leaderboardScreen(sWidth, sHeight, screen):
 
         # Check button
         if menuButton.isClicked():
-            return
+            return ["startscreen"]
 
         # Background
         screen.fill("SKYBLUE")
 
         # Title
-        title = titleFont.render(
-            "LEADERBOARD",
-            True,
-            "WHITE"
-        )
-
-        titleRect = title.get_rect(
-            center=(sWidth / 2, 100)
-        )
-
+        title = titleFont.render("LEADERBOARD", True, "WHITE")
+        titleRect = title.get_rect(center=(sWidth / 2, 100))
         screen.blit(title, titleRect)
 
         # Get scores
