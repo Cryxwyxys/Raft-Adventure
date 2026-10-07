@@ -33,6 +33,8 @@ smallRockHeight = 100
 
 pygame.init()
 
+global clock
+
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft1")
 clock = pygame.time.Clock()
@@ -223,9 +225,8 @@ class Wall(Rock):
 class Player():
 
     def __init__(self):
-        self.lives = 3
         self.xPos = sWidth / 2
-        self.maxHp = 3
+        self.maxHp = 1
         self.hp = self.maxHp
         self.width = playerWidth
         self.height = playerHeight
@@ -441,9 +442,29 @@ class RunningGame():
  
 if  __name__ == "__main__":
     instruction = screens.startScreen(sWidth, sHeight, screen)
-    if instruction[0] == "start":
-        p = RunningGame(instruction[1])
-        p.run()
-        screens.deathScreen(sWidth, sHeight, screen)
+
+    while True:
+        match instruction[0]:
+            case "start":
+                p = RunningGame(instruction[1])
+                p.run()
+                p.raft.hitbox.centery = sHeight+500
+                p.render()
+                pygame.image.save(screen, 'Assets/graphics/Screens/background.png')
+                instruction = ["death", instruction[1]]
+                
+
+            case "restart":
+                p = RunningGame(instruction[1])
+                p.run()
+                p.raft.hitbox.centery = sHeight+500
+                p.render()
+                pygame.image.save(screen, 'Assets/graphics/Screens/background.png')
+                instruction = ["death", instruction[1]]
+            
+            case "death":
+                instruction = screens.deathScreen(sWidth, sHeight, p.raft, instruction[1], screen)
+
 
     exit()
+

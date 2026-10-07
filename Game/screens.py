@@ -1,5 +1,6 @@
 import pygame
-import Buttons
+import Buttons#
+clock = pygame.time.Clock()
 
 def startScreen(sWidth, sHeight, screen):
 
@@ -28,11 +29,41 @@ def startScreen(sWidth, sHeight, screen):
         #if scoreButton.isClicked(): return ["scores"]
 
 
-def deathScreen(sWidth, sHeight, screen):
+def deathScreen(sWidth, sHeight, raft, name, screen):
+    background = pygame.image.load('Assets/graphics/Screens/background.png')
 
     img = pygame.image.load('Assets/graphics/Screens/death.png')
     img = pygame.transform.scale(img, (sWidth, sHeight))
 
+    raft.hitbox.centery -= 600
+
+    for i in range(60):
+        screen.blit(background, (0,0))
+        raft.hitbox.centery += 3
+        img.set_alpha(i * 5)
+        screen.blit(img, (0, 0))
+        screen.blit(raft.img, raft.hitbox)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+        pygame.display.update()
+        clock.tick(60)
+    
+    restartButton = Buttons.RestartButton(sWidth / 4, sHeight / 3 * 2, sWidth  / 6, sHeight / 5 *3, screen)
+
     while True:
         screen.blit(img, (0,0))
+        restartButton.render()
         pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        
+        if restartButton.isClicked():
+            print("fuck")
+            return ["restart",name]
