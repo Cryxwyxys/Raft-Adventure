@@ -315,7 +315,7 @@ class RunningGame():
         self.raft = Player()
         self.joystickX = 0
         self.speed = 1
-        self.countdownS = 10000
+        self.countdownS = 300
         self.countdownR = 0
         self.countdownW = 0
         self.obstacles = []
@@ -347,7 +347,7 @@ class RunningGame():
 
         if self.countdownS == 0:
             self.speed += 1
-            self.countdownS = 100
+            self.countdownS = 900
 
         if self.countdownR <= 0:
             for i in range(2): self.obstacles.append(Rock(smallRocks[randint(0,3)] ))
