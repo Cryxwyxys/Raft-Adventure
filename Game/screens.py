@@ -118,7 +118,7 @@ def leaderboardScreen(sWidth, sHeight, screen):
     scoreFont = pygame.font.Font(None, 45)
     titleFont = pygame.font.Font(None, 100)
 
-    menuButton = Buttons.MenuButton(sWidth /4, sHeight/4*3, 50, 50, screen)
+    menuButton = Buttons.MenuButton(sWidth /4*3, sHeight/4*3, 200, 200, screen)
 
     running = True
 
