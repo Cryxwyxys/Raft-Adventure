@@ -1,70 +1,76 @@
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include <Joystick.h>
 
-Adafruit_MPU6050 mpu;
+const uint8_t MPU_ADDR = 0x68;
 
-Joystick_ Joystick(
-  JOYSTICK_DEFAULT_REPORT_ID,
-  JOYSTICK_TYPE_JOYSTICK,
+Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
+                   1, 0,                       // 1 button, 0 hat switches
+                   true, true, false, false, false, false,
+                   false, false, false, false, false);
 
-  1,      // 1 tlačítko
-  0,      // 0 hat switchů
+bool writeReg(uint8_t reg, uint8_t val) {
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(reg);
+  Wire.write(val);
+  return Wire.endTransmission() == 0;
+}
 
-  true,   // X
-  true,   // Y
-  false,  // Z
-  false,  // Rx
-  false,  // Ry
-  false,  // Rz
-  false,  // Rudder
-  false,  // Throttle
-  false,  // Accelerator
-  false,  // Brake
-  false   // Steering
-);
+// Wake up and configure the sensor, returns true on success
+bool initMPU() {
+  if (!writeReg(0x6B, 0x00)) return false;     // PWR_MGMT_1: wake up
+  delay(100);
+  return writeReg(0x1C, 0x10)                  // accelerometer range +-8 g
+      && writeReg(0x1A, 0x04);                 // low-pass filter 21 Hz
+}
+
+// Read one 16-bit value (high byte first)
+int16_t read16() {
+  int16_t hi = Wire.read();
+  int16_t lo = Wire.read();
+  return (int16_t)((hi << 8) | lo);
+}
+
+// Read X and Y acceleration in m/s^2
+bool readAccel(float &ax, float &ay) {
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x3B);                            // ACCEL_XOUT_H
+  if (Wire.endTransmission(false) != 0) return false;
+  if (Wire.requestFrom(MPU_ADDR, (uint8_t)4, (uint8_t)true) != 4) return false;
+
+  int16_t rawX = read16();
+  int16_t rawY = read16();
+
+  ax = rawX / 4096.0 * 9.80665;                // +-8 g = 4096 LSB per g
+  ay = rawY / 4096.0 * 9.80665;
+  return true;
+}
 
 void setup() {
-
-  Serial.begin(115200);
-
-  delay(500);
-
-  // MPU6050
-  if (!mpu.begin(0x68)) {
-    while (1) {
-      delay(10);
-    }
-  }
-
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-
-  // Joystick
+  // Start the joystick first so the PC detects the device immediately
   Joystick.setXAxisRange(-127, 127);
   Joystick.setYAxisRange(-127, 127);
-
   Joystick.begin();
+
+  Wire.begin();
+  delay(500);                                  // give the sensor time to power up
+
+  // Retry until the sensor responds
+  while (!initMPU()) {
+    delay(200);
+  }
 }
 
 void loop() {
+  float ax, ay;
 
-  sensors_event_t a, g, temp;
+  // If the sensor stops responding, configure it again
+  if (!readAccel(ax, ay)) {
+    initMPU();
+    return;
+  }
 
-  mpu.getEvent(&a, &g, &temp);
-
-  // MPU6050 → joystick
-  int joystickX = (int)(-a.acceleration.y * 20.0);
-  int joystickY = (int)(a.acceleration.x * 20.0);
-
-  // Omezit rozsah
-  joystickX = constrain(joystickX, -127, 127);
-  joystickY = constrain(joystickY, -127, 127);
-
-  Joystick.setXAxis(joystickX);
-  Joystick.setYAxis(joystickY);
+  Joystick.setXAxis(constrain((int)( ay * 20.0), -127, 127));
+  Joystick.setYAxis(constrain((int)( ax * 20.0), -127, 127));
 
   delay(20);
 }

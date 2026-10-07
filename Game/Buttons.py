@@ -131,4 +131,30 @@ if __name__ == "__main__":
         if testbutton.isClicked():
             print("testButton")
             
+class LeaderboardButton(Button):
+
+    def __init__(self, xMiddle, yMiddle, width, height, screen):
+        super().__init__(
+            xMiddle,
+            yMiddle,
+            width,
+            height,
+            screen,
+            "Assets/graphics/Buttons/leaderboard.png",
+            "Assets/graphics/Buttons/leaderboardP.png"
+        )
+
+class MenuButton(Button):
+
+    def __init__(self, xMiddle, yMiddle, width, height, screen):
+        super().__init__(
+            xMiddle,
+            yMiddle,
+            width,
+            height,
+            screen,
+            "Assets/graphics/Buttons/menu.png",
+            "Assets/graphics/Buttons/menuP.png"
+        )
+
 
