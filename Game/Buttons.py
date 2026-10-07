@@ -134,8 +134,7 @@ if __name__ == "__main__":
 class LeaderboardButton(Button):
 
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        super().__init__(
-            xMiddle,
+        super().__init__(xMiddle,
             yMiddle,
             width,
             height,
