@@ -54,8 +54,8 @@ void loop() {
   float ax, ay;
   if (!readAccel(ax, ay)) return;
 
-  int joystickX = constrain((int)(-ay * 20.0), -127, 127);
-  int joystickY = constrain((int)( ax * 20.0), -127, 127);
+  int joystickX = constrain((int)(ay * 20.0), -127, 127);
+  int joystickY = constrain((int)(ax * 20.0), -127, 127);
 
   Joystick.setXAxis(joystickX);
   Joystick.setYAxis(joystickY);
