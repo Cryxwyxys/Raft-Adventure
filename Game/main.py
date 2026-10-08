@@ -264,9 +264,7 @@ class Player():
 
         if time.time() - self.lasthit > self.invisFrames:
             self.hp -= 1
-            self.spriteNum = int(
-                self.hp / self.maxHp * (len(raftSprites) - 1)
-            )
+            self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
             self.img = raftSprites[self.spriteNum]
 
             if self.xPos > x:
@@ -277,6 +275,8 @@ class Player():
                 self.surface = pygame.transform.rotate(self.img, -15)
 
             self.lasthit = time.time()
+            return True
+        return False
 
 def save_score(username, score):
     file_path = "scores.txt"
@@ -304,6 +304,10 @@ def save_score(username, score):
 class RunningGame():
 
     def __init__(self, name):
+
+        self.damageImg = pygame.image.load('Assets/graphics/Screens/damage.jpg')
+        self.damageImg = pygame.transform.scale(self.damageImg, (sWidth, sHeight))
+        self.backgroungImg = sky_surface
         self.name = name
         self.score = 0
         self.lastScoreTime = time.time()
@@ -361,24 +365,28 @@ class RunningGame():
             self.countdownW = 25
 
     def update(self):
-            for r in self.river:
-                r.update(self.raft.xPos, self.speed)
 
-            for i in range(len(self.obstacles)):
-                self.obstacles[i].update(self.speed, self.raft.xPos)
-            self.raft.update(self.inputX)
+        self.backgroungImg = sky_surface
+        for r in self.river:
+            r.update(self.raft.xPos, self.speed)
 
-            self.obstacles = [o for o in self.obstacles if o.zPos >= 150 and o.hitbox.centery < sHeight]
+        for i in range(len(self.obstacles)):
+            self.obstacles[i].update(self.speed, self.raft.xPos)
+        self.raft.update(self.inputX)
+
+        self.obstacles = [o for o in self.obstacles if o.zPos >= 150 and o.hitbox.centery < sHeight]
 
     def doCol(self):
 
         for i in range(len(self.obstacles)):
             if self.obstacles[i].detectCol(self.raft):
-                self.raft.damage(self.obstacles[i].xPos)
+                
+                if self.raft.damage(self.obstacles[i].xPos):
+                    self.backgroungImg = self.damageImg
                 
     def render(self):
 
-        screen.blit(sky_surface, (0, 0)) 
+        screen.blit(self.backgroungImg, (0, 0)) 
         for r in self.river:
             pygame.draw.polygon(screen,'BLUE', r.points, 0)
         
@@ -435,10 +443,9 @@ class RunningGame():
 
         screen.blit(scoreText, scoreRect)
 
-
  
 if  __name__ == "__main__":
-    instruction = screens.startScreen(sWidth, sHeight, screen)
+    instruction = [0]
 
     while True:
         match instruction[0]:
