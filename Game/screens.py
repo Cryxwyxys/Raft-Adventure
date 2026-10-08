@@ -28,7 +28,7 @@ def startScreen(sWidth, sHeight, screen):
 
             nameField.handleEvent(event)
 
-        gameTitle = gameTitleFont.render("Raft Adventure", True, "WHITE")
+        gameTitle = gameTitleFont.render("Raft Adventure", True, "BLACK")
         titleRect = gameTitle.get_rect(center=(sWidth / 2, 100))
         
         screen.blit(img, (0, 0))
