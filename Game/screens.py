@@ -14,6 +14,8 @@ def startScreen(sWidth, sHeight, screen):
 
     nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 5, sHeight / 8, screen)
 
+    exitButton = Buttons.ExitButton(sWidth / 12*11, sHeight /12, 180, 80, screen)
+
     img = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
 
     img = pygame.transform.scale(img, (sWidth, sHeight))
@@ -37,6 +39,7 @@ def startScreen(sWidth, sHeight, screen):
         nameField.render()
         startButton.render()
         leaderboardButton.render()
+        exitButton.render()
 
         pygame.display.update()
 
@@ -45,6 +48,12 @@ def startScreen(sWidth, sHeight, screen):
 
         if leaderboardButton.isClicked():
             return ["leaderboard"]
+        
+        if exitButton.isClicked():
+            pygame.quit()
+            exit()
+
+        
 
 def deathScreen(sWidth, sHeight, raft, name, screen):
     background = pygame.image.load('Assets/graphics/Screens/background.png')

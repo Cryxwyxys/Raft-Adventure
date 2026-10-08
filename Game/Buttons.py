@@ -156,4 +156,14 @@ class MenuButton(Button):
             "Assets/graphics/Buttons/menuP.png"
         )
 
-
+class ExitButton(Button):
+    def __init__(self, xMiddle, yMiddle, width, height, screen):
+        super().__init__(
+            xMiddle,
+            yMiddle,
+            width,
+            height,
+            screen,
+            "Assets/graphics/Buttons/exit.png",      # normal image
+            "Assets/graphics/Buttons/exitP.png"      # pressed / hover image
+        )
