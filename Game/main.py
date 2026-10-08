@@ -348,7 +348,7 @@ class RunningGame():
 
         if self.countdownS == 0:
             self.speed += 1
-            self.countdownS = 900
+            self.countdownS = 300
 
         if self.countdownR <= 0:
             for i in range(2): self.obstacles.append(Rock(smallRocks[randint(0,3)] ))
