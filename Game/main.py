@@ -36,7 +36,7 @@ pygame.init()
 global clock
 
 screen = pygame.display.set_mode((sWidth, sHeight))
-pygame.display.set_caption("Raft1")
+pygame.display.set_caption("Raft Game")
 clock = pygame.time.Clock()
 
 sky_surface = pygame.image.load('Assets/graphics/Sky.png').convert()
@@ -226,7 +226,7 @@ class Player():
 
     def __init__(self):
         self.xPos = sWidth / 2
-        self.maxHp = 1
+        self.maxHp = 3
         self.hp = self.maxHp
         self.width = playerWidth
         self.height = playerHeight
