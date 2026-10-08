@@ -4,6 +4,10 @@ clock = pygame.time.Clock()
 
 def startScreen(sWidth, sHeight, screen):
 
+    font = pygame.font.Font(None, 60)
+    
+    gameTitleFont = pygame.font.Font(None, 100)
+
     startButton = Buttons.StartButton( sWidth / 2, sHeight / 4, sWidth / 5,sHeight / 8,screen)
 
     leaderboardButton = Buttons.LeaderboardButton(sWidth / 2, sHeight / 4 * 3, sWidth / 5, sHeight / 8, screen)
@@ -16,8 +20,6 @@ def startScreen(sWidth, sHeight, screen):
 
     while True:
 
-        screen.blit(img, (0, 0))
-
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
@@ -26,6 +28,12 @@ def startScreen(sWidth, sHeight, screen):
 
             nameField.handleEvent(event)
 
+        gameTitle = gameTitleFont.render("Raft Adventure", True, "WHITE")
+        titleRect = gameTitle.get_rect(center=(sWidth / 2, 100))
+        
+        screen.blit(img, (0, 0))
+        screen.blit(gameTitle, titleRect)
+        
         nameField.render()
         startButton.render()
         leaderboardButton.render()
@@ -37,7 +45,6 @@ def startScreen(sWidth, sHeight, screen):
 
         if leaderboardButton.isClicked():
             return ["leaderboard"]
-
 
 def deathScreen(sWidth, sHeight, raft, name, screen):
     background = pygame.image.load('Assets/graphics/Screens/background.png')
@@ -118,7 +125,7 @@ def leaderboardScreen(sWidth, sHeight, screen):
     scoreFont = pygame.font.Font(None, 45)
     titleFont = pygame.font.Font(None, 100)
 
-    menuButton = Buttons.MenuButton(sWidth /4*3, sHeight/4*3, 200, 200, screen)
+    menuButton = Buttons.MenuButton(sWidth /4, sHeight/4*3, 50, 50, screen)
 
     running = True
 
