@@ -9,13 +9,19 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 global playerHeight
 global playerWidth
 
-playerHeight = 100
-playerWidth = 200
+
 
 global sWidth
 global sHeight
+
+
+
 sWidth = 1920
 sHeight = 1080
+
+playerHeight = sHeight / 10.8
+playerWidth = sWidth / 9.6
+
 #sWidth = 1280
 #sHeight = 720
 
@@ -305,8 +311,7 @@ class RunningGame():
 
     def __init__(self, name):
 
-        self.damageImg = pygame.image.load('Assets/graphics/Screens/damage.png')
-        self.damageAlpha = 0
+        self.damageImg = pygame.image.load('Assets/graphics/Screens/damage.jpg')
         self.damageImg = pygame.transform.scale(self.damageImg, (sWidth, sHeight))
         self.backgroungImg = sky_surface
         self.name = name
@@ -367,8 +372,7 @@ class RunningGame():
 
     def update(self):
 
-        if self.damageAlpha > 0:
-            self.damageAlpha -= 10
+        self.backgroungImg = sky_surface
         for r in self.river:
             r.update(self.raft.xPos, self.speed)
 
@@ -384,13 +388,11 @@ class RunningGame():
             if self.obstacles[i].detectCol(self.raft):
                 
                 if self.raft.damage(self.obstacles[i].xPos):
-                    self.damageAlpha = 255
+                    self.backgroungImg = self.damageImg
                 
     def render(self):
 
         screen.blit(self.backgroungImg, (0, 0)) 
-        self.damageImg.set_alpha(self.damageAlpha)
-        screen.blit(self.damageImg,(0,0))
         for r in self.river:
             pygame.draw.polygon(screen,'BLUE', r.points, 0)
         
@@ -417,8 +419,6 @@ class RunningGame():
 
     def death(self):
         save_score(self.name, self.score)
-        self.damageAlpha = 0
-        self.raft.hitbox.centery = sHeight+500
         
     def doATick(self):
 
@@ -458,7 +458,7 @@ if  __name__ == "__main__":
             case "start":
                 p = RunningGame(instruction[1])
                 p.run()
-
+                p.raft.hitbox.centery = sHeight+500
                 p.render()
                 pygame.image.save(screen, 'Assets/graphics/Screens/background.png')
                 instruction = ["death", instruction[1]]
