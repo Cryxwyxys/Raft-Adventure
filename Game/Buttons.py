@@ -72,7 +72,7 @@ class RestartButton(Button):
 class TextField(Button): # Vibe-Coded
 
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        self.text = "enter Name"
+        self.text = "Enter Name"
         self.font = pygame.font.SysFont(None, 36)
         self.active = False   #checks if textinput should go in that field
         displaytext = self.font.render(self.text, True, 'BLACK')
@@ -93,7 +93,7 @@ class TextField(Button): # Vibe-Coded
                 self.text = self.text[:-1]                    #removes last char from string
 
         elif self.active and event.type == pygame.TEXTINPUT:
-            if self.text == "enter Name": self.text = ""      #QoS might optemise later 
+            if self.text == "Enter Name": self.text = ""      #QoS might optemise later 
             self.text += event.text                           #adds textinput to text
 
     def render(self):
