@@ -295,11 +295,11 @@ class Player():
             return True
         return False
 
-        def heal(self):
-            self.hp -= 1
-            self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
-            self.img = raftSprites[self.spriteNum]
-            return True
+    def heal(self):
+        self.hp += 1
+        self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
+        self.img = raftSprites[self.spriteNum]
+        return True
 
 
 def save_score(username, score):
@@ -333,7 +333,7 @@ class RunningGame():
         self.damageImg = pygame.transform.scale(self.damageImg, (sWidth, sHeight))
         self.healImg = pygame.image.load('Assets/graphics/Screens/heal.png')
         self.healImg = pygame.transform.scale(self.healImg, (sWidth, sHeight))
-        self.healAlpha = 255
+        self.healAlpha = 0
         self.damageAlpha = 0
         self.backgroungImg = sky_surface
         self.name = name
@@ -405,8 +405,12 @@ class RunningGame():
         self.backgroungImg = sky_surface
         if self.damageAlpha > 0:
             self.damageAlpha -= 10
-        
+
+        if self.healAlpha > 0:
+            self.healAlpha -= 10
+
         self.damageImg.set_alpha(self.damageAlpha)
+        self.healImg.set_alpha(self.healAlpha)
 
         for r in self.river:
             r.update(self.raft.xPos, self.speed)
@@ -425,19 +429,22 @@ class RunningGame():
 
     def doCol(self):
 
-        for i in range(len(self.obstacles)):
+        for i in range(len(self.obstacles) - 2):
             if self.obstacles[i].detectCol(self.raft):
                 if self.obstacles[i].__class__ == Plank:
-                    if self.raft.heal(self.obstacles[i].xPos):
+                    if self.raft.heal():
                         self.healAlpha = 255
-                
-                if self.raft.damage(self.obstacles[i].xPos):
-                    self.damageAlpha = 255
+                        self.obstacles.pop(i)
+                else:
+                    if self.raft.damage(self.obstacles[i].xPos):
+                        self.damageAlpha = 255
                 
     def render(self):
 
         screen.blit(self.backgroungImg, (0, 0)) 
         screen.blit(self.damageImg,(0,0))
+        screen.blit(self.healImg,(0,0))
+
 
         for r in self.river:
             pygame.draw.polygon(screen,'BLUE', r.points, 0)
