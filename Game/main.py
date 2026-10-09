@@ -40,6 +40,8 @@ smallRockHeight = 100
 pygame.init()
 
 global clock
+global plankImg
+plankImg = pygame.image.load('Assets/graphics/wood.png')
 
 screen = pygame.display.set_mode((sWidth, sHeight))
 pygame.display.set_caption("Raft Game")
@@ -226,6 +228,15 @@ class Wall(Rock):
     def update(self, speed, xPlayer):
         super().update(speed, xPlayer)
         
+class Plank(MovingObject):
+
+    def __init__(self):
+        self.img = plankImg
+        self.img = pygame.transform.scale(self.img, (rockWidth,smallRockHeight))
+        self.rect = self.img.get_rect()
+        super().__init__(self.rect)
+
+        self.referenceImg = self.img  # keep the original, unscaled image around to prevent quality loss (im a retard)
 
 
 class Player():
@@ -284,6 +295,13 @@ class Player():
             return True
         return False
 
+        def heal(self):
+            self.hp -= 1
+            self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
+            self.img = raftSprites[self.spriteNum]
+            return True
+
+
 def save_score(username, score):
     file_path = "scores.txt"
     scores = {}
@@ -311,8 +329,12 @@ class RunningGame():
 
     def __init__(self, name):
 
-        self.damageImg = pygame.image.load('Assets/graphics/Screens/damage.jpg')
+        self.damageImg = pygame.image.load('Assets/graphics/Screens/damage.png')
         self.damageImg = pygame.transform.scale(self.damageImg, (sWidth, sHeight))
+        self.healImg = pygame.image.load('Assets/graphics/Screens/heal.png')
+        self.healImg = pygame.transform.scale(self.healImg, (sWidth, sHeight))
+        self.healAlpha = 255
+        self.damageAlpha = 0
         self.backgroungImg = sky_surface
         self.name = name
         self.score = 0
@@ -329,7 +351,9 @@ class RunningGame():
         self.countdownS = 300
         self.countdownR = 0
         self.countdownW = 0
+        self.countdownH = 1000
         self.obstacles = []
+        self.border = []
 
     def events(self):
 
@@ -342,6 +366,7 @@ class RunningGame():
         self.countdownS -= 1
         self.countdownR -= self.speed
         self.countdownW -= self.speed
+        self.countdownH -= self.speed
 
     def getInput(self, usesJoystick):
 
@@ -365,42 +390,67 @@ class RunningGame():
             self.countdownR = 200
 
         if self.countdownW <= 0:
-            self.obstacles.append(Wall(walls[randint(0,3)],  False))
-            self.obstacles.append(Wall(walls[randint(0,3)],  True))
+            self.border.append(Wall(walls[randint(0,3)],  False))
+            self.border.append(Wall(walls[randint(0,3)],  True))
 
             self.countdownW = 25
+        
+        if self.countdownH <= 0:
+
+            self.obstacles.append(Plank())
+            self.countdownH = randint(1000, 2000)
 
     def update(self):
 
         self.backgroungImg = sky_surface
+        if self.damageAlpha > 0:
+            self.damageAlpha -= 10
+        
+        self.damageImg.set_alpha(self.damageAlpha)
+
         for r in self.river:
             r.update(self.raft.xPos, self.speed)
 
+        self.border = [o for o in self.border if o.zPos >= 150 and o.hitbox.centery < sHeight]
+        self.obstacles = [o for o in self.obstacles if o.zPos >= 150 and o.hitbox.centery < sHeight]
+
         for i in range(len(self.obstacles)):
             self.obstacles[i].update(self.speed, self.raft.xPos)
+
+        for i in range(len(self.border)):
+            self.border[i].update(self.speed, self.raft.xPos)
+
         self.raft.update(self.inputX)
 
-        self.obstacles = [o for o in self.obstacles if o.zPos >= 150 and o.hitbox.centery < sHeight]
 
     def doCol(self):
 
         for i in range(len(self.obstacles)):
             if self.obstacles[i].detectCol(self.raft):
+                if self.obstacles[i].__class__ == Plank:
+                    if self.raft.heal(self.obstacles[i].xPos):
+                        self.healAlpha = 255
                 
                 if self.raft.damage(self.obstacles[i].xPos):
-                    self.backgroungImg = self.damageImg
+                    self.damageAlpha = 255
                 
     def render(self):
 
         screen.blit(self.backgroungImg, (0, 0)) 
+        screen.blit(self.damageImg,(0,0))
+
         for r in self.river:
             pygame.draw.polygon(screen,'BLUE', r.points, 0)
-        
+
+        for i in range(len(self.border) - 1, -1 , -1):
+            r = self.border[i]
+            screen.blit(r.img, r.hitbox) 
+
         for i in range(len(self.obstacles) - 1, -1 , -1):
             r = self.obstacles[i]
             screen.blit(r.img, r.hitbox) 
 
-    
+        
         screen.blit(self.raft.surface,  self.raft.hitbox)
         self.drawScore()
         pygame.display.update()
@@ -419,7 +469,8 @@ class RunningGame():
 
     def death(self):
         save_score(self.name, self.score)
-        
+        self.damageAlpha = 0
+
     def doATick(self):
 
         self.events()
