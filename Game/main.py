@@ -349,7 +349,7 @@ class RunningGame():
         
         self.raft = Player()
         self.joystickX = 0
-        self.speed = 1
+        self.speed = 3
         self.countdownS = 300
         self.countdownR = 0
         self.countdownW = 0
