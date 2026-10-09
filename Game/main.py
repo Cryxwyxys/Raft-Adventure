@@ -296,10 +296,12 @@ class Player():
         return False
 
     def heal(self):
-        self.hp += 1
-        self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
-        self.img = raftSprites[self.spriteNum]
-        return True
+        if self.hp < self.maxHp:
+            self.hp += 1
+            self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
+            self.img = raftSprites[self.spriteNum]
+            return True
+        return False
 
 
 def save_score(username, score):
