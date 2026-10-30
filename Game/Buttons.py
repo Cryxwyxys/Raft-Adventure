@@ -76,7 +76,7 @@ class TextField(Button):
         displaytext = self.font.render(self.text, True, 'BLACK')
         textRect = displaytext.get_rect()
 
-        super().__init__(xMiddle, yMiddle, textRect.width + 200, height, screen,
+        super().__init__(xMiddle, yMiddle, width + 200, height, screen,
                           'Assets/graphics/Buttons/textField.png', "Assets/graphics/Buttons/textFieldP.png")
 
     def handleEvent(self, event): # needs to be put in the for pygame.event.get loop

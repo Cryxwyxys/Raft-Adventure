@@ -9,7 +9,7 @@ def startScreen(sWidth, sHeight, screen):
 
     startButton = Buttons.StartButton( sWidth / 2, sHeight / 4, sWidth / 16 * 2, sHeight / 9 * 2,screen)
     leaderboardButton = Buttons.LeaderboardButton(sWidth / 2, sHeight / 4 * 3, sWidth / 5, sHeight / 8, screen)
-    nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 4, sHeight / 8, screen)
+    nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 5, sHeight / 8, screen)
     exitButton = Buttons.ExitButton(sWidth / 12*11, sHeight /12, sWidth / 16, sHeight / 9, screen)
 
     img = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
