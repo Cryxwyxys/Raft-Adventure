@@ -9,12 +9,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 global playerHeight
 global playerWidth
 
-
-
 global sWidth
 global sHeight
-
-
 
 sWidth = 1920
 sHeight = 1080
@@ -189,7 +185,6 @@ class MovingObject():
     def __del__(self):
         pass
         
-
 
 class Rock(MovingObject):
 
@@ -458,7 +453,6 @@ class RunningGame():
         for i in range(len(self.obstacles) - 1, -1 , -1):
             r = self.obstacles[i]
             screen.blit(r.img, r.hitbox) 
-
         
         screen.blit(self.raft.surface,  self.raft.hitbox)
         self.drawScore()

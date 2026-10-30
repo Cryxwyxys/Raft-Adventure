@@ -65,24 +65,19 @@ class RestartButton(Button):
         val = super().isClicked()
         return val
 
-    def render(self):
-        super().render()
 
-
-class TextField(Button): # Vibe-Coded
+class TextField(Button):
 
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        self.text = "Enter Name"
+
+        self.text = ""
         self.font = pygame.font.SysFont(None, 36)
         self.active = False   #checks if textinput should go in that field
         displaytext = self.font.render(self.text, True, 'BLACK')
         textRect = displaytext.get_rect()
 
         super().__init__(xMiddle, yMiddle, textRect.width + 200, height, screen,
-                          'Assets/graphics/Buttons/textField.png', "Assets/graphics/Buttons/textField.png")
-
-    def checkHovering(self):
-        super().checkHovering()
+                          'Assets/graphics/Buttons/textField.png', "Assets/graphics/Buttons/textFieldP.png")
 
     def handleEvent(self, event): # needs to be put in the for pygame.event.get loop
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -92,56 +87,25 @@ class TextField(Button): # Vibe-Coded
             if event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]                    #removes last char from string
 
-        elif self.active and event.type == pygame.TEXTINPUT:
-            if self.text == "Enter Name": self.text = ""      #QoS might optemise later 
+        elif self.active and event.type == pygame.TEXTINPUT:      
             self.text += event.text                           #adds textinput to text
 
     def render(self):
-        super().render()  # zeichnet weiterhin imgN/imgP
+        if self.active or self.text != "":
+            self.screen.blit(self.imgN, self.rect)
+        else:
+            self.screen.blit(self.imgP, self.rect)
+
         displaytext = self.font.render(self.text, True, 'BLACK')
         textRect = displaytext.get_rect(center=self.rect.center)
         self.screen.blit(displaytext, textRect)
 
 
-
-
-
-if __name__ == "__main__":
-    import time # for debugging, can probably removed in the end
-    import os
-
-    pygame.init()
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((1000, 1000))
-    pygame.display.set_caption("Raft1")
-    testbutton = RestartButton(50, 50 , 100, 100, screen)
-    while True: 
-        
-
-
-        testbutton.render()
-        pygame.display.update()
-        clock.tick(60)
-
-        for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-
-        if testbutton.isClicked():
-            print("testButton")
-            
 class LeaderboardButton(Button):
 
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        super().__init__(xMiddle,
-            yMiddle,
-            width,
-            height,
-            screen,
-            "Assets/graphics/Buttons/leaderboard.png",
-            "Assets/graphics/Buttons/leaderboardP.png"
-        )
+        super().__init__(xMiddle, yMiddle, width, height, screen,
+            "Assets/graphics/Buttons/leaderboard.png", "Assets/graphics/Buttons/leaderboardP.png")
 
 class MenuButton(Button):
 

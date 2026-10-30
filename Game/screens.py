@@ -5,19 +5,14 @@ clock = pygame.time.Clock()
 def startScreen(sWidth, sHeight, screen):
 
     font = pygame.font.Font(None, 60)
-    
     gameTitleFont = pygame.font.Font(None, 100)
 
     startButton = Buttons.StartButton( sWidth / 2, sHeight / 4, sWidth / 16 * 2, sHeight / 9 * 2,screen)
-
     leaderboardButton = Buttons.LeaderboardButton(sWidth / 2, sHeight / 4 * 3, sWidth / 5, sHeight / 8, screen)
-
-    nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 5, sHeight / 8, screen)
-
+    nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 4, sHeight / 8, screen)
     exitButton = Buttons.ExitButton(sWidth / 12*11, sHeight /12, sWidth / 16, sHeight / 9, screen)
 
     img = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
-
     img = pygame.transform.scale(img, (sWidth, sHeight))
 
     while True:
@@ -54,7 +49,6 @@ def startScreen(sWidth, sHeight, screen):
             exit()
 
         
-
 def deathScreen(sWidth, sHeight, raft, name, screen):
     background = pygame.image.load('Assets/graphics/Screens/background.png')
 
@@ -102,25 +96,14 @@ def load_scores():
 
     scores = []
 
-    try:
-        with open("scores.txt", "r", encoding="utf-8") as file:
+    with open("scores.txt", "r", encoding="utf-8") as file:
 
-            for line in file:
-                line = line.strip()
+        for line in file:
+            line = line.strip()
 
-                if not line:
-                    continue
+            name, score = line.split("-", 1)
+            scores.append((name, int(score)))
 
-                try:
-                    name, score = line.split("-", 1)
-                    scores.append((name, int(score)))
-                except ValueError:
-                    continue
-
-    except FileNotFoundError:
-        pass
-
-    # Highest score first
     scores.sort(key=lambda x: x[1], reverse=True)
 
     return scores
@@ -136,9 +119,9 @@ def leaderboardScreen(sWidth, sHeight, screen):
 
     menuButton = Buttons.MenuButton(sWidth /4*3, sHeight/4*3, 200, 200, screen)
 
-    running = True
+    while True:
 
-    while running:
+        scores = load_scores()
 
         for event in pygame.event.get():
 
@@ -146,53 +129,29 @@ def leaderboardScreen(sWidth, sHeight, screen):
                 pygame.quit()
                 exit()
 
-        # Check button
-        if menuButton.isClicked():
-            return ["startscreen"]
+        if menuButton.isClicked(): return ["startscreen"]
 
-        # Background
         screen.fill("SKYBLUE")
 
-        # Title
         title = titleFont.render("LEADERBOARD", True, "WHITE")
         titleRect = title.get_rect(center=(sWidth / 2, 100))
         screen.blit(title, titleRect)
 
-        # Get scores
-        scores = load_scores()
 
         # Display top 10
         y = 270
 
         for i, (name, score) in enumerate(scores[:10]):
 
-            text = scoreFont.render(
-                f"{i + 1}. {name}     {score}",
-                True,
-                "WHITE"
-            )
-
-            textRect = text.get_rect(
-                center=(sWidth / 2, y)
-            )
-
+            text = scoreFont.render(f"{i + 1}. {name}     {score}", True, "WHITE")
+            textRect = text.get_rect(center=(sWidth / 2, y))
             screen.blit(text, textRect)
 
             y += 60
 
-        # No scores message
         if not scores:
-
-            text = scoreFont.render(
-                "No scores yet!",
-                True,
-                "WHITE"
-            )
-
-            textRect = text.get_rect(
-                center=(sWidth / 2, 300)
-            )
-
+            text = scoreFont.render("No scores yet!", True, "WHITE")
+            textRect = text.get_rect(center=(sWidth / 2, 300))
             screen.blit(text, textRect)
 
         menuButton.render()
