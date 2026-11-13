@@ -110,24 +110,15 @@ class LeaderboardButton(Button):
 class MenuButton(Button):
 
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        super().__init__(
-            xMiddle,
-            yMiddle,
-            width,
-            height,
-            screen,
-            "Assets/graphics/Buttons/menu.png",
-            "Assets/graphics/Buttons/menuP.png"
-        )
+        super().__init__( xMiddle, yMiddle, width, height, screen,
+            "Assets/graphics/Buttons/menu.png", "Assets/graphics/Buttons/menuP.png")
 
 class ExitButton(Button):
     def __init__(self, xMiddle, yMiddle, width, height, screen):
-        super().__init__(
-            xMiddle,
-            yMiddle,
-            width,
-            height,
-            screen,
-            "Assets/graphics/Buttons/exit.png",      # normal image
-            "Assets/graphics/Buttons/exitP.png"      # pressed / hover image
-        )
+        super().__init__( xMiddle, yMiddle, width, height, screen,
+            "Assets/graphics/Buttons/exit.png", "Assets/graphics/Buttons/exitP.png")
+
+class SettingsButton(Button):
+    def __init__(self, xMiddle, yMiddle, width, height, screen):
+        super().__init__( xMiddle, yMiddle, width, height, screen,
+            "Assets/graphics/Buttons/settingsButton.png", "Assets/graphics/Buttons/settingsButtonP.png")

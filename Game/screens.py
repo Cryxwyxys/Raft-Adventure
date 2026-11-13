@@ -7,10 +7,11 @@ def startScreen(sWidth, sHeight, screen):
     font = pygame.font.Font(None, 60)
     gameTitleFont = pygame.font.Font(None, 100)
 
-    startButton = Buttons.StartButton( sWidth / 2, sHeight / 4, sWidth / 16 * 2, sHeight / 9 * 2,screen)
+    startButton = Buttons.StartButton( sWidth / 2, sHeight / 4, sWidth / 16 * 2, sHeight / 9 * 2, screen)
     leaderboardButton = Buttons.LeaderboardButton(sWidth / 2, sHeight / 4 * 3, sWidth / 5, sHeight / 8, screen)
     nameField = Buttons.TextField(sWidth / 2, sHeight / 2, sWidth / 5, sHeight / 8, screen)
     exitButton = Buttons.ExitButton(sWidth / 12*11, sHeight /12, sWidth / 16, sHeight / 9, screen)
+    settingsButton = Buttons.SettingsButton(sWidth / 12 , sHeight / 10, sWidth / 6, sHeight / 5, screen)
 
     img = pygame.image.load('Assets/graphics/Screens/Title.jpg').convert()
     img = pygame.transform.scale(img, (sWidth, sHeight))
@@ -31,6 +32,7 @@ def startScreen(sWidth, sHeight, screen):
         screen.blit(img, (0, 0))
         screen.blit(gameTitle, titleRect)
         
+        settingsButton.render()
         nameField.render()
         startButton.render()
         leaderboardButton.render()
@@ -47,6 +49,9 @@ def startScreen(sWidth, sHeight, screen):
         if exitButton.isClicked():
             pygame.quit()
             exit()
+
+        if settingsButton.isClicked():
+            return ["settings"]
 
         
 def deathScreen(sWidth, sHeight, raft, name, screen):
@@ -111,8 +116,6 @@ def load_scores():
 
 def leaderboardScreen(sWidth, sHeight, screen):
 
-    clock = pygame.time.Clock()
-
     font = pygame.font.Font(None, 60)
     scoreFont = pygame.font.Font(None, 45)
     titleFont = pygame.font.Font(None, 100)
@@ -159,3 +162,7 @@ def leaderboardScreen(sWidth, sHeight, screen):
         pygame.display.update()
 
         clock.tick(60)
+
+def settingsScreen(sWidth, sHeight, screen):
+    print("settings")
+    return [startScreen]

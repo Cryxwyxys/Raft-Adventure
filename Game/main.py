@@ -9,8 +9,12 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 global playerHeight
 global playerWidth
 
+
+
 global sWidth
 global sHeight
+
+
 
 sWidth = 1920
 sHeight = 1080
@@ -186,6 +190,7 @@ class MovingObject():
         pass
         
 
+
 class Rock(MovingObject):
 
     def __init__(self, img):
@@ -261,8 +266,8 @@ class Player():
     def updatePos(self, x):
         self.xPos += (int(x) / 50)
 
-        if self.xPos > sWidth / 2 + riversize / 2 - self.width / 2: self.xPos = sWidth / 2 + riversize / 2 -self.width / 2
-        if self.xPos < sWidth / 2 - riversize / 2 + self.width / 2: self.xPos = sWidth / 2 - riversize / 2 +self.width / 2
+        if self.xPos > sWidth / 2 + riversize / 2 : self.xPos = sWidth / 2 + riversize / 2 
+        if self.xPos < sWidth / 2 - riversize / 2 : self.xPos = sWidth / 2 - riversize / 2
 
 
     def updateVis(self):
@@ -302,16 +307,14 @@ class Player():
 def save_score(username, score):
     file_path = "scores.txt"
     scores = {}
-    try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            for line in file:
-                line = line.strip()
-                if not line:
-                    continue
-                name, old_score = line.split("-", 1)
-                scores[name] = int(old_score)
-    except FileNotFoundError:
-        pass
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+            name, old_score = line.split("-", 1)
+            scores[name] = int(old_score)
+
     if username not in scores or score > scores[username]:
         scores[username] = score
     with open(file_path, "w", encoding="utf-8") as file:
@@ -453,6 +456,7 @@ class RunningGame():
         for i in range(len(self.obstacles) - 1, -1 , -1):
             r = self.obstacles[i]
             screen.blit(r.img, r.hitbox) 
+
         
         screen.blit(self.raft.surface,  self.raft.hitbox)
         self.drawScore()
@@ -524,7 +528,10 @@ if  __name__ == "__main__":
                 instruction = screens.leaderboardScreen(sWidth, sHeight, screen)
 
             case "startscreen":
-                instruction = screens.startScreen(sWidth, sHeight, screen) 
+                instruction = screens.startScreen(sWidth, sHeight, screen)
+
+            case "settings":
+                instruction = screens.settingsScreen(sWidth, sHeight, screen)
 
             case _ :            #default
                 instruction = screens.startScreen(sWidth, sHeight, screen)
