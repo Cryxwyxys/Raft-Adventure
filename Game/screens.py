@@ -165,4 +165,4 @@ def leaderboardScreen(sWidth, sHeight, screen):
 
 def settingsScreen(sWidth, sHeight, screen):
     print("settings")
-    return [startScreen]
+    return ["startScreen"]
