@@ -1,4 +1,6 @@
 import pygame
+import json
+
 import Buttons#
 clock = pygame.time.Clock()
 
@@ -164,5 +166,64 @@ def leaderboardScreen(sWidth, sHeight, screen):
         clock.tick(60)
 
 def settingsScreen(sWidth, sHeight, screen):
-    print("settings")
-    return ["startScreen"]
+
+    with open("settings.json", "r", encoding="utf-8",) as f:
+        settingsDict = json.load(f)
+
+    font = pygame.font.Font(None, 60)
+    
+    tFullscreen = font.render(f"fullscreen: {settingsDict["fullscreen"]}", True, "WHITE")
+    tFullscreenRect = tFullscreen.get_rect(center= (sWidth / 2, sHeight / 5))
+    fullscreenButton = Buttons.OnOffButton(tFullscreenRect.right + sWidth / 10, sHeight / 5, sWidth / 10, sHeight / 10,
+                                             settingsDict["fullscreen"], screen)
+
+    difficultySlider = Buttons.Slider(sHeight / 5 * 3, sWidth / 5 * 2, sWidth / 5 * 3, sHeight / 20, 4, settingsDict["difficulty"], screen)
+
+    n = settingsDict["difficultiNames"][settingsDict["difficulty"]]
+      
+    tDifficulty = font.render(f"Difficulty : {n}", True, "WHITE")
+    tDifficultyRect = tDifficulty.get_rect(center= (sWidth / 2, sHeight / 7 * 4))
+
+    exitButton = Buttons.ExitButton(sWidth / 5, sHeight / 5 * 4, sWidth / 8, sHeight / 5, screen)
+
+    while True:
+        if fullscreenButton.isClicked():
+            if not t:
+                fullscreenButton.flip()
+            t = True
+            if fullscreenButton.state: settingsDict["fullscreen"] = True
+            else: settingsDict["fullscreen"] = False
+        else: t = False
+
+        if difficultySlider.isClicked():
+            difficultySlider.slide()
+            settingsDict["difficulty"] = difficultySlider.getVal()
+
+        if exitButton.isClicked():
+            with open("settings.json", "w", encoding="utf-8") as f:
+                
+                t = json.dumps(settingsDict)
+                f.write(t)
+            return["startscreen",tuple]
+
+        n = settingsDict["difficultiNames"][settingsDict["difficulty"]]
+        tFullscreen = font.render(f"fullscreen: {settingsDict["fullscreen"]}", True, "WHITE")
+        tDifficulty = font.render(f"Difficulty : {n}", True, "WHITE")
+    
+
+        screen.fill("GREY")
+
+        screen.blit(tFullscreen, tFullscreenRect)
+        screen.blit(tDifficulty, tDifficultyRect)
+        fullscreenButton.render()
+        difficultySlider.render()
+        exitButton.render()
+        
+        pygame.display.update()
+
+        clock.tick(60)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+    return [0,0]
