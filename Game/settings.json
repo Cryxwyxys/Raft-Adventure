@@ -1,14 +1,1 @@
-{
-    "fullscreen": false, 
-    "sWidth": 1900, 
-    "sHeight": 900,
-    "usesJoystick": false, 
-    "difficulty": 3, 
-    "difficultiNames": ["def", "easy", "mid", "hard"], 
-
-    "speed": [3, 3, 3, 5], 
-    "acceleration": [300, 300, 200, 100], 
-    "lives": [1000, 5, 3, 1], 
-    "countdownH": [1000, 1000, 1200, 2000], 
-    "countdownR": [300, 300, 250, 200]
-}
+{"fullscreen": true, "sWidth": 1900, "sHeight": 900, "usesJoystick": false, "difficulty": 3, "difficultiNames": ["def", "easy", "mid", "hard"], "speed": [3, 3, 3, 5], "acceleration": [300, 300, 200, 100], "lives": [1000, 5, 3, 1], "countdownH": [1000, 1000, 1200, 2000], "countdownR": [300, 300, 250, 200]}

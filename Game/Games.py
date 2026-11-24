@@ -313,7 +313,6 @@ class RunningGame():
         tilesize = 20
         for i in range(100, 1000, tilesize):
             self.river.append(RoadTile(i, tilesize))
-        print("walls worked")
 
         self.damageImg = pygame.image.load('Assets/graphics/Screens/damage.png')
         self.damageImg = pygame.transform.scale(self.damageImg, (sWidth, sHeight))

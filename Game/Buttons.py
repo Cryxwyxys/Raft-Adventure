@@ -141,37 +141,54 @@ class OnOffButton(Button):
     
 
 class Slider():
-    def __init__(self, yMiddle, left, right, height, options, pos, screen):
+    def __init__(self, yMiddle, left, right, height, options, val, screen):
+        self.left = left
+        self.right = right
         self.options = options
         self.screen = screen
         self.yMiddle = yMiddle
         self.width = right - left
         self.height = height
-        self.imgL = pygame.image.load("Assets/graphics/Buttons/Sliderline.png")
-        self.imgL = pygame.transform.scale(self.imgL, (self.width, self.height / 5))
-        self.rectL = self.imgL.get_rect(center= ((left+right) / 2, yMiddle))
+        self.val = val
+
+        self.dragging = False
+        self.locked = True
+
         self.sections = []
         for i in range(options):
             self.sections.append(left + self.width / (options - 1) * i)
-            
-        self.pos = self.sections[pos]
+
+        self.imgL = pygame.image.load("Assets/graphics/Buttons/Sliderline.png")
+        self.imgL = pygame.transform.scale(self.imgL, (self.width, self.height / 5))
+        self.rectL = self.imgL.get_rect(center= ((left+right) / 2, yMiddle))
 
         self.imgP = pygame.image.load("Assets/graphics/Buttons/Sliderpoint.png")
         self.imgP = pygame.transform.scale(self.imgP, (self.height, self.height))
-        self.rectP = self.imgP.get_rect(center=(self.pos, yMiddle))
+        self.rectP = self.imgP.get_rect(center=(self.sections[self.val], yMiddle))
 
     def slide(self):
         mouseX = pygame.mouse.get_pos()[0]
-        if mouseX < self.sections[0]: self.pos = self.sections[0]
+        self.checkDragging()
+        if self.dragging:
+            self.locked = False
+            if self.left <= mouseX <= self.right:
+                self.rectP.centerx = mouseX
+            elif self.left > mouseX: self.rectP.centerx = self.left
+            else: self.rectP.centerx = self.right
         else:
-            for t in self.sections:
-                if mouseX < t + self.width / self.options:
-                    self.pos = t
-                    break
-        if mouseX > self.sections[-1]:
-            self.pos = self.sections[-1]
-        self.rectP.centerx = self.pos
-    
+            if self.locked: return
+            tsection = min(self.sections, key=lambda x:abs(x-mouseX))
+            self.rectP.centerx = tsection
+            self.val = self.sections.index(tsection)
+            self.locked = True
+
+    def checkDragging(self):
+        if self.dragging == True and pygame.mouse.get_pressed()[0]:
+            self.dragging = True
+        elif pygame.mouse.get_pressed()[0] and self.rectP.collidepoint(pygame.mouse.get_pos()):
+            self.dragging = True
+        else: self.dragging = False
+            
     def render(self):
         self.screen.blit(self.imgL, self.rectL)
         self.screen.blit(self.imgP, self.rectP)
@@ -184,4 +201,5 @@ class Slider():
         return self.hovering and self.down
 
     def getVal(self):
-        return self.sections.index(self.pos)
+        return self.val
+

@@ -216,7 +216,7 @@ def settingsScreen(sWidth, sHeight, screen):
             else: settingsDict["usesJoystick"] = False
         else: t2 = False
 
-        if difficultySlider.isClicked():
+        if difficultySlider.isClicked() or difficultySlider.locked == False:
             difficultySlider.slide()
             settingsDict["difficulty"] = difficultySlider.getVal()
 
