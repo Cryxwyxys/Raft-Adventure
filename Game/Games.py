@@ -294,13 +294,13 @@ class RunningGame():
 
         with open("settings.json", "r", encoding= "utf-8") as f:
             self.settingsDict = json.load(f)
-            sWidth = self.settingsDict["sWidth"]
-            sHeight = self.settingsDict["sHeight"] 
-            screen = givenScreen
+        sWidth = screenWidth
+        sHeight = screenHeight
+        screen = givenScreen
 
             
-            riversize = 0.5 * sWidth
-            self.difficulty = self.settingsDict["difficulty"]
+        riversize = 0.5 * sWidth
+        self.difficulty = self.settingsDict["difficulty"]
         
         self.usesJoystick = usesJoystick
         rockWidth = 0.1 * sWidth

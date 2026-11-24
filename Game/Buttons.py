@@ -153,7 +153,6 @@ class Slider():
         self.sections = []
         for i in range(options):
             self.sections.append(left + self.width / (options - 1) * i)
-        print(self.sections)
             
         self.pos = self.sections[pos]
 

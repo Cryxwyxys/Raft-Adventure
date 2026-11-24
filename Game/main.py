@@ -7,34 +7,38 @@ import Buttons
 import screens
 import Games
 
+pygame.init()
+
 global sWidth 
 global sHeight
+global screenWidth
+global screenHeight
+info = pygame.display.Info()
+screenHeight = info.current_h
+screenWidth = info.current_w
 sWidth = 0
 sHeight = 0
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-pygame.init()
 
-def loadSettings():
+
+def loadScreenSettings():
     with open("settings.json", "r", encoding= "utf-8") as f:
         settings = json.load(f)
         if settings["fullscreen"]:
             info = pygame.display.Info()
-            sWidth = info.current_w
-            print(sWidth)
-            sHeight = info.current_h
+            sWidth = screenWidth
+            sHeight = screenHeight
         else:
             sWidth = settings["sWidth"]
             sHeight = settings["sHeight"]
-        screen = pygame.display.set_mode((sWidth, sHeight))
-        return screen
+        return [sWidth, sHeight]
 
-screen = loadSettings()
-info = pygame.display.Info()
-sWidth = info.current_w
-sHeight = info.current_h
-print(screen)
+sSize = loadScreenSettings()
+screen = pygame.display.set_mode(([sSize[0],sSize[1]]))
+sWidth = sSize[0]
+sHeight = sSize[1]
 pygame.display.set_caption("Raft Game")
 
 
@@ -52,7 +56,6 @@ usesJoystick = False
  
 if  __name__ == "__main__":
     instruction = [0]
-    loadSettings()
     while True:
         match instruction[0]:
             case "start":
@@ -75,11 +78,10 @@ if  __name__ == "__main__":
             case "settings":
                 instruction = screens.settingsScreen(sWidth, sHeight, screen)
                 if instruction[1] == True:
-                    screen = loadSettings()
-                    info = pygame.display.Info()
-                    sWidth = info.current_w
-                    sHeight = info.current_h
+                    sSize = loadScreenSettings()
+                    screen = pygame.display.set_mode(([sSize[0],sSize[1]]))
+                    sWidth = sSize[0]
+                    sHeight = sSize[1]
 
             case _ :            #default
-                print(sWidth)
                 instruction = screens.startScreen(sWidth, sHeight, screen)

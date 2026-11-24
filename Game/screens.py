@@ -204,7 +204,7 @@ def settingsScreen(sWidth, sHeight, screen):
                 
                 t = json.dumps(settingsDict)
                 f.write(t)
-            return["startscreen",tuple]
+            return["startscreen",True]
 
         n = settingsDict["difficultiNames"][settingsDict["difficulty"]]
         tFullscreen = font.render(f"fullscreen: {settingsDict["fullscreen"]}", True, "WHITE")
@@ -226,4 +226,4 @@ def settingsScreen(sWidth, sHeight, screen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
-    return [0,0]
+    return [0,True]
