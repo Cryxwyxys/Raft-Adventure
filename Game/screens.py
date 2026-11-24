@@ -177,23 +177,44 @@ def settingsScreen(sWidth, sHeight, screen):
     fullscreenButton = Buttons.OnOffButton(tFullscreenRect.right + sWidth / 10, sHeight / 5, sWidth / 10, sHeight / 10,
                                              settingsDict["fullscreen"], screen)
 
-    difficultySlider = Buttons.Slider(sHeight / 5 * 3, sWidth / 5 * 2, sWidth / 5 * 3, sHeight / 20, 4, settingsDict["difficulty"], screen)
+    difficultySlider = Buttons.Slider(sHeight / 11 * 5, sWidth / 5 * 2, sWidth / 5 * 3, sHeight / 20, 4, settingsDict["difficulty"], screen)
 
     n = settingsDict["difficultiNames"][settingsDict["difficulty"]]
       
     tDifficulty = font.render(f"Difficulty : {n}", True, "WHITE")
-    tDifficultyRect = tDifficulty.get_rect(center= (sWidth / 2, sHeight / 7 * 4))
+    tDifficultyRect = tDifficulty.get_rect(center= (sWidth / 2, sHeight / 7 * 3))
 
-    exitButton = Buttons.ExitButton(sWidth / 5, sHeight / 5 * 4, sWidth / 8, sHeight / 5, screen)
+    tJoystick = font.render(f"Joystick connectet: {settingsDict["usesJoystick"]}", True, "WHITE")
+    tJoystickRect = tJoystick.get_rect(center=(sWidth / 2, sHeight / 4 * 3))
+
+    exitButton = Buttons.ExitButton(sWidth / 7, sHeight / 5 * 4, sWidth / 8, sHeight / 5, screen)
+
+    controlerButton = Buttons.OnOffButton(sWidth / 4 * 3, sHeight / 4 * 3, sWidth / 10, sHeight / 10, settingsDict["usesJoystick"], screen)
 
     while True:
         if fullscreenButton.isClicked():
-            if not t:
+            if not t1:
                 fullscreenButton.flip()
-            t = True
+            t1 = True
             if fullscreenButton.state: settingsDict["fullscreen"] = True
             else: settingsDict["fullscreen"] = False
-        else: t = False
+        else: t1 = False
+
+        if controlerButton.isClicked():
+            if not t2:
+                controlerButton.flip()
+            t2 = True
+            if controlerButton.state: 
+                if(pygame.joystick.get_count()):
+                    pygame.joystick.init()
+                    joystick = pygame.joystick.Joystick(0)
+                    joystick.init()
+                    settingsDict["usesJoystick"] = True
+                else:
+                    settingsDict["usesJoystick"] = False
+                    controlerButton.state = False
+            else: settingsDict["usesJoystick"] = False
+        else: t2 = False
 
         if difficultySlider.isClicked():
             difficultySlider.slide()
@@ -215,8 +236,10 @@ def settingsScreen(sWidth, sHeight, screen):
 
         screen.blit(tFullscreen, tFullscreenRect)
         screen.blit(tDifficulty, tDifficultyRect)
+        screen.blit(tJoystick, tJoystickRect)
         fullscreenButton.render()
         difficultySlider.render()
+        controlerButton.render()
         exitButton.render()
         
         pygame.display.update()

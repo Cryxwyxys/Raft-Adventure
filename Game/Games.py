@@ -283,7 +283,7 @@ def save_score(username, score):
 
 class RunningGame():
 
-    def __init__(self, name, screenWidth, screenHeight, givenScreen, usesJoystick):
+    def __init__(self, name, screenWidth, screenHeight, givenScreen,):
 
         global sWidth
         global sHeight
@@ -302,7 +302,7 @@ class RunningGame():
         riversize = 0.5 * sWidth
         self.difficulty = self.settingsDict["difficulty"]
         
-        self.usesJoystick = usesJoystick
+        self.usesJoystick = self.settingsDict["usesJoystick"]
         rockWidth = 0.1 * sWidth
         smallRockHeight = sHeight / 7
 
