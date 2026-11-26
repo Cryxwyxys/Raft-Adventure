@@ -169,10 +169,10 @@ class Wall(Rock):
         self.zPos = pos
  
         if right: 
-            self.xPos = sWidth/2 + riversize / 2 + self.rect.width / 2
+            self.xPos = sWidth/2 + riversize / 2
             pass
         else:
-            self.xPos = sWidth/2 - riversize / 2 - self.rect.width / 2
+            self.xPos = sWidth/2 - riversize / 2
             self.img = pygame.transform.flip(img, True, False)
             self.referenceImg = self.img
             pass
@@ -401,7 +401,7 @@ class RunningGame():
         for r in self.river:
             r.update(self.raft.xPos, self.speed)
 
-        self.border = [o for o in self.border if o.zPos >= 150 and o.hitbox.centery < sHeight]
+        self.border = [o for o in self.border if o.zPos >= 50 and o.hitbox.centery < sHeight]
         self.obstacles = [o for o in self.obstacles if o.zPos >= 150 and o.hitbox.centery < sHeight]
 
         for i in range(len(self.obstacles)):
@@ -424,6 +424,11 @@ class RunningGame():
                 else:
                     if self.raft.damage(self.obstacles[i].xPos):
                         self.damageAlpha = 255
+
+        for i in range(len(self.border) - 2):
+            if self.border[i].detectCol(self.raft):
+                self.raft.damage(self.border[i].xPos)
+                self.damageAlpha = 255
                 
     def render(self):
 
