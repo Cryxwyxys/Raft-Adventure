@@ -427,8 +427,8 @@ class RunningGame():
 
         for i in range(len(self.border) - 2):
             if self.border[i].detectCol(self.raft):
-                self.raft.damage(self.border[i].xPos)
-                self.damageAlpha = 255
+                if self.raft.damage(self.border[i].xPos):
+                    self.damageAlpha = 255
                 
     def render(self):
 
