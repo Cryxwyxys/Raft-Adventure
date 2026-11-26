@@ -64,10 +64,10 @@ def deathScreen(sWidth, sHeight, raft, name, screen):
 
     raft.hitbox.centery -= 600
 
-    for i in range(60):
+    for i in range(10):
         screen.blit(background, (0,0))
-        raft.hitbox.centery += 3
-        img.set_alpha(i * 5)
+        raft.hitbox.centery += sHeight / 500
+        img.set_alpha(i * 30)
         screen.blit(img, (0, 0))
         screen.blit(raft.img, raft.hitbox)
         
@@ -103,30 +103,33 @@ def load_scores():
 
     scores = []
 
-    with open("scores.txt", "r", encoding="utf-8") as file:
-
-        for line in file:
-            line = line.strip()
-
-            name, score = line.split("-", 1)
-            scores.append((name, int(score)))
-
-    scores.sort(key=lambda x: x[1], reverse=True)
+    with open("scores.json", "r", encoding="utf-8") as f:
+        scores = json.load(f)
 
     return scores
 
 
 def leaderboardScreen(sWidth, sHeight, screen):
 
-    font = pygame.font.Font(None, 60)
-    scoreFont = pygame.font.Font(None, 45)
-    titleFont = pygame.font.Font(None, 100)
+    with open("settings.json", "r", encoding="utf-8") as f:
+        settingsDict = json.load(f)
+        difficulties = settingsDict["difficultiNames"]
 
-    menuButton = Buttons.MenuButton(sWidth /4*3, sHeight/4*3, 200, 200, screen)
+    scores = load_scores()
+    fields = []
 
+    gameTitleFont = pygame.font.Font(None, 100)
+
+    for i in range(len(difficulties) - 1):
+        try:
+            fields.append((ScoresField(sWidth / (len(difficulties)) * (i + 1) , sHeight / 5, 
+                                        sWidth / (len(difficulties)  + 2), sHeight / 5 * 4,
+                                        "RED", difficulties[i + 1], scores[difficulties[i + 1]], screen)))
+        except KeyError: 
+            pass
+
+    menuButton = Buttons.MenuButton(sWidth /8*7, sHeight/4*3, 200, 200, screen)
     while True:
-
-        scores = load_scores()
 
         for event in pygame.event.get():
 
@@ -138,32 +141,51 @@ def leaderboardScreen(sWidth, sHeight, screen):
 
         screen.fill("SKYBLUE")
 
-        title = titleFont.render("LEADERBOARD", True, "WHITE")
+        title = gameTitleFont.render("LEADERBOARD", True, "WHITE")
         titleRect = title.get_rect(center=(sWidth / 2, 100))
         screen.blit(title, titleRect)
 
-
-        # Display top 10
-        y = 270
-
-        for i, (name, score) in enumerate(scores[:10]):
-
-            text = scoreFont.render(f"{i + 1}. {name}     {score}", True, "WHITE")
-            textRect = text.get_rect(center=(sWidth / 2, y))
-            screen.blit(text, textRect)
-
-            y += 60
-
-        if not scores:
-            text = scoreFont.render("No scores yet!", True, "WHITE")
-            textRect = text.get_rect(center=(sWidth / 2, 300))
-            screen.blit(text, textRect)
-
+        for f in fields: 
+            f.render()
         menuButton.render()
 
         pygame.display.update()
 
         clock.tick(60)
+
+class ScoresField():
+    def __init__(self, xPos, yPos, width, height, color, title, scores : dict, screen):
+        self.title = title
+        self.rect = pygame.Rect(xPos - width / 2, yPos , width, height)
+        self.color = color
+        self.scores = []
+        self.screen = screen
+        
+        for s in scores:
+            t = []
+            #t.append(i + 1)
+            t.append(s)
+            t.append(scores[s])
+            self.scores.append(t)
+
+        self.scores.sort(key=lambda x: x[1], reverse=True)
+
+    def render(self):
+
+        scoreFont = pygame.font.Font(None, 45)
+        nameFont = pygame.font.Font(None, 100)
+
+        pygame.draw.rect(self.screen, self.color, self.rect)
+
+        self.titleText = nameFont.render(self.title, True, "WHITE")
+        self.titleTRect = self.titleText.get_rect()
+        self.titleTRect.center = (self.rect.centerx, self.titleTRect.height * 3 / 2 + self.rect.top)
+        self.screen.blit(self.titleText, self.titleTRect)
+        for i in range(len(self.scores)):
+            text = scoreFont.render(f"{i + 1}  {self.scores[i][0]} {self.scores[i][1]} ", True, "WHITE")
+            tRect = text.get_rect()
+            tRect.center = (self.rect.centerx, self.titleTRect.bottom + tRect.height * (1.5 * i + 1))
+            self.screen.blit(text, tRect)
 
 def settingsScreen(sWidth, sHeight, screen):
 

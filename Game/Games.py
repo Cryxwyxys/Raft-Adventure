@@ -260,24 +260,24 @@ class Player():
         return False
 
 
-def save_score(username, score):
-    file_path = "scores.txt"
-    scores = {}
-    with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-            if not line:
-                continue
-            name, old_score = line.split("-", 1)
-            scores[name] = int(old_score)
+def save_score(username, score, dif):
+    file_path = "scores.json"
+    
+    with open(file_path, "r", encoding="utf-8") as f:
+        allScores = json.load(f)
+    try:
+        scores = allScores[dif]
+    except KeyError:
+        allScores[dif] = {}
+        scores = allScores[dif]
 
-    if username not in scores or score > scores[username]:
+    if username not in scores or scores[username] < score:
         scores[username] = score
-    with open(file_path, "w", encoding="utf-8") as file:
-        for name, player_score in scores.items():
-            file.write(f"{name}-{player_score}\n")
+        allScores[dif] = scores
 
-    print(f"Score saved: {username} - {score}")
+    with open(file_path, "w", encoding="utf-8") as f:
+        t = json.dumps(allScores)
+        f.write(t)
 
 
 
@@ -461,7 +461,8 @@ class RunningGame():
 
 
     def death(self):
-        save_score(self.name, self.score)
+        name = self.settingsDict["difficultiNames"][self.difficulty]
+        save_score(self.name, self.score, name)
         self.damageAlpha = 0
 
     def doATick(self):
