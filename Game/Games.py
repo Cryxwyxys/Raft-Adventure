@@ -225,7 +225,6 @@ class Player():
         if self.xPos > sWidth / 2 + riversize / 2 : self.xPos = sWidth / 2 + riversize / 2 
         if self.xPos < sWidth / 2 - riversize / 2 : self.xPos = sWidth / 2 - riversize / 2
 
-
     def updateVis(self):
 
         if time.time() - self.lasthit > 1:
@@ -233,22 +232,21 @@ class Player():
 
         pygame.draw.rect(screen, 'RED', self.hitbox, 10, 10)
 
-    def damage(self, x):
+    def damage(self, obj):
 
         if time.time() - self.lasthit > self.invisFrames:
             self.hp -= 1
             self.spriteNum = int(self.hp / self.maxHp * (len(raftSprites) - 1))
             self.img = raftSprites[self.spriteNum]
-
-            if self.xPos > x:
-                self.xPos += 100
-                self.surface = pygame.transform.rotate(self.img, 15)
-            else: 
-                self.xPos -= 100
-                self.surface = pygame.transform.rotate(self.img, -15)
-
             self.lasthit = time.time()
             return True
+
+        gap = (obj.hitbox.width + self.hitbox.width) * obj.zPos / sWidth
+        if self.xPos > obj.xPos:
+            self.xPos = obj.xPos + gap * 0.9
+        else:
+            self.xPos = obj.xPos - gap * 0.9
+        
         return False
 
     def heal(self):
@@ -258,7 +256,6 @@ class Player():
             self.img = raftSprites[self.spriteNum]
             return True
         return False
-
 
 def save_score(username, score, dif):
     file_path = "scores.json"
@@ -278,8 +275,6 @@ def save_score(username, score, dif):
     with open(file_path, "w", encoding="utf-8") as f:
         t = json.dumps(allScores)
         f.write(t)
-
-
 
 class RunningGame():
 
@@ -398,6 +393,8 @@ class RunningGame():
         self.damageImg.set_alpha(self.damageAlpha)
         self.healImg.set_alpha(self.healAlpha)
 
+        self.raft.update(self.inputX)
+
         for r in self.river:
             r.update(self.raft.xPos, self.speed)
 
@@ -410,7 +407,7 @@ class RunningGame():
         for i in range(len(self.border)):
             self.border[i].update(self.speed, self.raft.xPos)
 
-        self.raft.update(self.inputX)
+        
 
 
     def doCol(self):
@@ -422,14 +419,16 @@ class RunningGame():
                         self.healAlpha = 255
                         self.obstacles.pop(i)
                 else:
-                    if self.raft.damage(self.obstacles[i].xPos):
+                    if self.raft.damage(self.obstacles[i]):
+                        self.obstacles.pop(i)
                         self.damageAlpha = 255
 
         for i in range(len(self.border) - 2):
             if self.border[i].detectCol(self.raft):
-                if self.raft.damage(self.border[i].xPos):
+                if self.raft.damage(self.border[i]):
                     self.damageAlpha = 255
-                
+
+             
     def render(self):
 
         screen.blit(self.backgroungImg, (0, 0)) 
